@@ -1,0 +1,143 @@
+[
+{
+    "description": "Receives binary input and holds the state for a given time",
+    "id": "notgenerated",
+    "type": "countdown_switch",
+    "inputs": ["0dc5ee85cc40772b", "f920bb22a0c96021"],
+    "outputs": ["dcc55baf0f0a74e9"]
+},
+{
+    "id": "0dc5ee85cc40772b",
+    "type": "function",
+    "z": "db80d944fe52f664",
+    "name": "state filter",
+    "func": "\nvar newMsg = { payload: msg.payload.occupancy};\nnewMsg.topic = \"binary_sensor\"\n\nreturn newMsg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 480,
+    "y": 540,
+    "wires": [
+        [
+            "bb464e7c6a26041b"             
+        ]
+    ]
+},
+{
+    "id": "08aea132760c61e4",
+    "type": "inject",
+    "z": "db80d944fe52f664",
+    "name": "timestamp every 1 second",
+    "props": [
+        {
+            "p": "payload"
+        },
+        {
+            "p": "topic",
+            "vt": "str"
+        }
+    ],
+    "repeat": "1",
+    "crontab": "",
+    "once": true,
+    "onceDelay": 0.1,
+    "topic": "trigger",
+    "payload": "",
+    "payloadType": "date",
+    "x": 280,
+    "y": 240,
+    "wires": [
+        [
+            "bb464e7c6a26041b"
+        ]
+    ]
+},
+{
+    "id": "bb464e7c6a26041b",
+    "type": "function",
+    "z": "db80d944fe52f664",
+    "name": "countdown switch",
+    "func": "//let occupancy_state = flow.get(\"occupancy_state\")\nlet counter = flow.get(\"count\")\nvar newMsg = null;\n\n\n\nswitch(msg.topic) {\n    case \"binary_sensor\":\n             \n        if(msg.payload == true) {\n            \n            counter = 10;\n            flow.set(\"count\", counter);\n        }\n        break;\n    case \"trigger\":\n        \n        break;\n    default:\n        return newMsg;        \n}\n\nif(counter == 0) {\n    newMsg = { payload: \"OFF\" };\n}\nelse {    \n    counter--;\n    flow.set(\"count\",counter)\n    newMsg = { payload: \"ON\" };\n}\n\n\n\nreturn newMsg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "// Der Code hier wird ausgeführt,\n// wenn der Node gestartet wird\nflow.set(\"count\", 0);",
+    "finalize": "",
+    "libs": [],
+    "x": 620,
+    "y": 240,
+    "wires": [
+        [
+            "dcc55baf0f0a74e9"
+        ]
+    ]
+},
+{
+    "id": "dcc55baf0f0a74e9",
+    "type": "function",
+    "z": "db80d944fe52f664",
+    "name": "binary state transition",
+    "func": "let old_state = flow.get(\"switch_state\");\nlet new_state = msg.payload;\n\nvar newMsg = null;\n\nif (old_state == \"OFF\" && new_state == \"ON\") {\n    newMsg = { payload: \"{\\\"state\\\": \\\"ON\\\"}\" };\n}\n\nif (old_state == \"ON\" && new_state == \"OFF\") {\n    newMsg = { payload: \"{\\\"state\\\": \\\"OFF\\\"}\" };\n}\n\nreturn newMsg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 880,
+    "y": 240,
+    "wires": [
+        [
+            "notset"
+        ]
+    ]
+},
+{
+    "id": "f920bb22a0c96021",
+    "type": "function",
+    "z": "db80d944fe52f664",
+    "name": "state filter",
+    "func": "\nvar newMsg = { payload: msg.payload.state};\n\nnewMsg.topic = \"state\"\n\nreturn newMsg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 620,
+    "y": 100,
+    "wires": [
+        [
+            "6920d3c9e36282d8"
+        ]
+    ]
+},
+{
+    "id": "6920d3c9e36282d8",
+    "type": "change",
+    "z": "db80d944fe52f664",
+    "name": "",
+    "rules": [
+        {
+            "t": "set",
+            "p": "switch_state",
+            "pt": "flow",
+            "to": "payload",
+            "tot": "msg"
+        }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 920,
+    "y": 100,
+    "wires": [
+        []
+    ]
+}
+]

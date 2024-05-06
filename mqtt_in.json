@@ -1,0 +1,31 @@
+[
+{
+    "description": "MQTT input",
+    "id": "notset",
+    "lb_device_id":"notset",
+    "type": "",
+    "inputs": [],
+    "outputs": ["aee8f05fab1a04b8"]
+},
+{
+    "id": "aee8f05fab1a04b8",
+    "type": "mqtt in",
+    "z": "",
+    "name": "",
+    "topic": "",
+    "qos": "2",
+    "datatype": "auto-detect",
+    "broker": "",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 340,
+    "y": 100,
+    "wires": [
+        [
+            "notset"
+        ]
+    ]
+}
+]

@@ -1,0 +1,28 @@
+[
+{
+    "description": "MQTT output",
+    "id": "notset",
+    "lb_device_id":"notset",
+    "type": "",
+    "inputs": ["9a1cdaf00db4384b"],
+    "outputs": []
+},
+{
+    "id": "9a1cdaf00db4384b",
+    "type": "mqtt out",
+    "z": "",
+    "name": "lb2_mqtt_out",
+    "topic": "zigbee2mqtt/insert_z2m_ID/set",
+    "qos": "",
+    "retain": "",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "",
+    "x": 100,
+    "y": 100,
+    "wires": []
+}
+]
