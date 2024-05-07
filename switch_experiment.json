@@ -1,6 +1,6 @@
 [
     {
-        "id": "ea01f8ea1593430b",
+        "id": "3e07ab041cb94785",
         "type": "tab",
         "label": "lorabridge flow",
         "disabled": true,
@@ -8,9 +8,9 @@
         "env": []
     },
     {
-        "id": "51123f20ef134f41",
+        "id": "2722c1c339534907",
         "type": "mqtt in",
-        "z": "ea01f8ea1593430b",
+        "z": "3e07ab041cb94785",
         "name": "",
         "topic": "",
         "qos": "2",
@@ -24,14 +24,14 @@
         "y": 100,
         "wires": [
             [
-                "40741c98b24644d0"
+                "20e79641cffd46a3"
             ]
         ]
     },
     {
-        "id": "fc7c5cf005854e8a",
+        "id": "92c3edf584944493",
         "type": "mqtt in",
-        "z": "ea01f8ea1593430b",
+        "z": "3e07ab041cb94785",
         "name": "",
         "topic": "",
         "qos": "2",
@@ -45,14 +45,14 @@
         "y": 100,
         "wires": [
             [
-                "e689c408da124dda"
+                "5092af7e1d9d4a7e"
             ]
         ]
     },
     {
-        "id": "c6bb386495b456d",
+        "id": "ff2044adbb7e4d88",
         "type": "mqtt out",
-        "z": "ea01f8ea1593430b",
+        "z": "3e07ab041cb94785",
         "name": "lb2_mqtt_out",
         "topic": "zigbee2mqtt/insert_z2m_ID/set",
         "qos": "",
@@ -68,9 +68,9 @@
         "wires": []
     },
     {
-        "id": "40741c98b24644d0",
+        "id": "20e79641cffd46a3",
         "type": "function",
-        "z": "ea01f8ea1593430b",
+        "z": "3e07ab041cb94785",
         "name": "state filter",
         "func": "\nvar newMsg = { payload: msg.payload.occupancy};\nnewMsg.topic = \"binary_sensor\"\n\nreturn newMsg;",
         "outputs": 1,
@@ -83,14 +83,14 @@
         "y": 540,
         "wires": [
             [
-                "e727423fecf5436b"
+                "62b775cb4b794727"
             ]
         ]
     },
     {
-        "id": "78af82ac8884ee8",
+        "id": "7ae4eff8ed5144f6",
         "type": "inject",
-        "z": "ea01f8ea1593430b",
+        "z": "3e07ab041cb94785",
         "name": "timestamp every 1 second",
         "props": [
             {
@@ -112,16 +112,16 @@
         "y": 240,
         "wires": [
             [
-                "e727423fecf5436b"
+                "62b775cb4b794727"
             ]
         ]
     },
     {
-        "id": "e727423fecf5436b",
+        "id": "62b775cb4b794727",
         "type": "function",
-        "z": "ea01f8ea1593430b",
+        "z": "3e07ab041cb94785",
         "name": "countdown switch",
-        "func": "//let occupancy_state = flow.get(\"occupancy_state\")\nlet counter = flow.get(\"count\")\nvar newMsg = null;\n\n\n\nswitch(msg.topic) {\n    case \"binary_sensor\":\n             \n        if(msg.payload == true) {\n            \n            counter = 10;\n            flow.set(\"count\", counter);\n        }\n        break;\n    case \"trigger\":\n        \n        break;\n    default:\n        return newMsg;        \n}\n\nif(counter == 0) {\n    newMsg = { payload: \"OFF\" };\n}\nelse {    \n    counter--;\n    flow.set(\"count\",counter)\n    newMsg = { payload: \"ON\" };\n}\n\n\n\nreturn newMsg;",
+        "func": "//let occupancy_state = flow.get(\"occupancy_state\")\nlet counter = flow.get(\"count\")\nvar newMsg = null;\n\n\n\nswitch(msg.topic) {\n    case \"binary_sensor\":\n             \n        if(msg.payload == true) {\n            \n            counter = 15;\n            flow.set(\"count\", counter);\n        }\n        break;\n    case \"trigger\":\n        \n        break;\n    default:\n        return newMsg;        \n}\n\nif(counter == 0) {\n    newMsg = { payload: \"OFF\" };\n}\nelse {    \n    counter--;\n    flow.set(\"count\",counter)\n    newMsg = { payload: \"ON\" };\n}\n\n\n\nreturn newMsg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -132,14 +132,14 @@
         "y": 240,
         "wires": [
             [
-                "6b1ca349d7bc46d9"
+                "41094ba371894ac8"
             ]
         ]
     },
     {
-        "id": "6b1ca349d7bc46d9",
+        "id": "41094ba371894ac8",
         "type": "function",
-        "z": "ea01f8ea1593430b",
+        "z": "3e07ab041cb94785",
         "name": "binary state transition",
         "func": "let old_state = flow.get(\"switch_state\");\nlet new_state = msg.payload;\n\nvar newMsg = null;\n\nif (old_state == \"OFF\" && new_state == \"ON\") {\n    newMsg = { payload: \"{\\\"state\\\": \\\"ON\\\"}\" };\n}\n\nif (old_state == \"ON\" && new_state == \"OFF\") {\n    newMsg = { payload: \"{\\\"state\\\": \\\"OFF\\\"}\" };\n}\n\nreturn newMsg;",
         "outputs": 1,
@@ -152,14 +152,14 @@
         "y": 240,
         "wires": [
             [
-                "c6bb386495b456d"
+                "ff2044adbb7e4d88"
             ]
         ]
     },
     {
-        "id": "e689c408da124dda",
+        "id": "5092af7e1d9d4a7e",
         "type": "function",
-        "z": "ea01f8ea1593430b",
+        "z": "3e07ab041cb94785",
         "name": "state filter",
         "func": "\nvar newMsg = { payload: msg.payload.state};\n\nnewMsg.topic = \"state\"\n\nreturn newMsg;",
         "outputs": 1,
@@ -172,14 +172,14 @@
         "y": 100,
         "wires": [
             [
-                "19a07a5f2657479a"
+                "871eab647ae049cc"
             ]
         ]
     },
     {
-        "id": "19a07a5f2657479a",
+        "id": "871eab647ae049cc",
         "type": "change",
-        "z": "ea01f8ea1593430b",
+        "z": "3e07ab041cb94785",
         "name": "",
         "rules": [
             {

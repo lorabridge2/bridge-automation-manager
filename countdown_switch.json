@@ -4,7 +4,15 @@
     "id": "notgenerated",
     "type": "countdown_switch",
     "inputs": ["0dc5ee85cc40772b", "f920bb22a0c96021"],
-    "outputs": ["dcc55baf0f0a74e9"]
+    "outputs": ["dcc55baf0f0a74e9"],
+    "parameters": [        
+            {
+                "nametag": "lb_countdown_value",
+                "current_value": 5,
+                "node_id": "bb464e7c6a26041b",
+                "nodekey": "func"
+            }                 
+    ]
 },
 {
     "id": "0dc5ee85cc40772b",
@@ -60,7 +68,7 @@
     "type": "function",
     "z": "db80d944fe52f664",
     "name": "countdown switch",
-    "func": "//let occupancy_state = flow.get(\"occupancy_state\")\nlet counter = flow.get(\"count\")\nvar newMsg = null;\n\n\n\nswitch(msg.topic) {\n    case \"binary_sensor\":\n             \n        if(msg.payload == true) {\n            \n            counter = 10;\n            flow.set(\"count\", counter);\n        }\n        break;\n    case \"trigger\":\n        \n        break;\n    default:\n        return newMsg;        \n}\n\nif(counter == 0) {\n    newMsg = { payload: \"OFF\" };\n}\nelse {    \n    counter--;\n    flow.set(\"count\",counter)\n    newMsg = { payload: \"ON\" };\n}\n\n\n\nreturn newMsg;",
+    "func": "//let occupancy_state = flow.get(\"occupancy_state\")\nlet counter = flow.get(\"count\")\nvar newMsg = null;\n\n\n\nswitch(msg.topic) {\n    case \"binary_sensor\":\n             \n        if(msg.payload == true) {\n            \n            counter = lb_countdown_value;\n            flow.set(\"count\", counter);\n        }\n        break;\n    case \"trigger\":\n        \n        break;\n    default:\n        return newMsg;        \n}\n\nif(counter == 0) {\n    newMsg = { payload: \"OFF\" };\n}\nelse {    \n    counter--;\n    flow.set(\"count\",counter)\n    newMsg = { payload: \"ON\" };\n}\n\n\n\nreturn newMsg;",
     "outputs": 1,
     "timeout": 0,
     "noerr": 0,

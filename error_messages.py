@@ -10,3 +10,4 @@ class error_messages(IntEnum):
     COMMAND_MALFORMED = 6
     NODE_TYPE_NOT_FOUND = 7
     MQTT_BROKER_NOT_FOUND = 8
+    PARAMETER_NOT_FOUND = 9

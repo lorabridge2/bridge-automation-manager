@@ -1,5 +1,6 @@
 
 import json
+import array
 
 from enum import IntEnum
 
@@ -61,6 +62,12 @@ class action_bytes(IntEnum):
     TIME_SYNC_RESPONSE = action_byte_dictionary["time_sync_response"]
     ADD_FLOW = action_byte_dictionary["add_flow"]
     FLOW_COMPLETE = action_byte_dictionary["flow_complete"]
+
+class parameter_data_types(IntEnum):
+    BOOLEAN = 0
+    INTEGER = 1
+    FLOAT = 2
+    STRING = 3
 
 node_type_dictionary = {
     "binary_device": 1,
@@ -213,6 +220,42 @@ def disconnect_nodes(flow_id, output_node_id, output_id) -> int:
 
     return error_messages.NO_ERRORS
 
+def parameter_update(flow_id, node_id, parameter_id, num_bytes, parameter_type, raw_bytes):
+    _flow = seek_flow(flow_id)
+    if _flow == None:
+        return error_messages.FLOW_NOT_FOUND
+    
+    _node = seek_node(flow_id,node_id)
+    if _node == None:
+        return error_messages.NODE_NOT_FOUND
+    
+    # Convert value
+
+    new_value = 0
+
+    match parameter_type:
+        case parameter_data_types.BOOLEAN:
+            new_value = bool(raw_bytes[0])
+        case parameter_data_types.INTEGER:
+            new_value = int.from_bytes(raw_bytes[0:num_bytes], "big")
+        case parameter_data_types.FLOAT:
+            arr = array.array('f')
+            arr.frombytes(bytearray(raw_bytes[0:num_bytes]))            
+            new_value = arr[0]
+        case parameter_data_types.STRING:
+            new_value = bytes(raw_bytes[0:num_bytes]).decode("utf-8")
+
+    if "parameters" in _node.nodered_template[0]:
+        parameter = _node.nodered_template[0]["parameters"][parameter_id]
+
+        if parameter == None:
+            return error_messages.PARAMETER_NOT_FOUND
+        else:
+            parameter["current_value"] = new_value
+    else:
+        return error_messages.PARAMETER_NOT_FOUND
+
+
 # TODO: Before actual deletion, traverse all connections (wires) in flows nodes and remove all the output connections to the node being deleted
 
 def remove_node(flow_id, node_id) -> int:
@@ -294,7 +337,27 @@ def parse_compressed_command(command) -> int:
             print("output node", output_node)
             print("input node", input_node)
             return err
+        
+        case action_bytes.PARAMETER_UPDATE:
+            # Variable length command..
 
+            # TODO: sanity check for correct length should be made
+
+            #if len(command) is not len(command_byte_structures["parameter_update"]):
+            #    return error_messages.COMMAND_MALFORMED
+            
+            #  "parameter_update": {"action_byte":0, "flow_id": 1, "node_id": 2, "parameter_id": 3, "bytes": 4, "type": 5, "content": 6}
+
+            flow_id = command[command_byte_structures["parameter_update"]["flow_id"]]
+            node_id = command[command_byte_structures["parameter_update"]["node_id"]]
+            parameter_id = command[command_byte_structures["parameter_update"]["parameter_id"]]
+            bytes_num = command[command_byte_structures["parameter_update"]["bytes"]]
+            parameter_type = command[command_byte_structures["parameter_update"]["type"]]
+            raw_bytes = command[command_byte_structures["parameter_update"]["content"]:]
+
+            err = parameter_update(flow_id, node_id, parameter_id, bytes_num, parameter_type, raw_bytes)
+
+            return err
         #"connect_node": {"action_byte": 0, "flow_id": 1, "output_node": 2,"output":3, "input_node": 4, "input": 5}
 
 # add flow
@@ -327,6 +390,12 @@ compressed_commands.append([4, 0, 1, 0, 3, 1])
 # connect timed switch to MQTT output
 
 compressed_commands.append([4, 0, 3, 0, 2, 0])
+
+# update countdown parameter 
+
+#parameter_update(flow_id, node_id, parameter_id, num_bytes, parameter_type, raw_bytes)
+
+compressed_commands.append([3, 0, 3, 0, 1, parameter_data_types.INTEGER, 15])
 
 for cmd in compressed_commands:
     parse_compressed_command(cmd)

@@ -55,6 +55,32 @@ def compose_nodered_flow_to_json(flow : LBflow, output_file : str) -> int:
 
         #nodered_flow.append(node.nodered_template[1:])
 
+    # Check for parameters to be updated/initialized
+
+    if "parameters" in node.nodered_template[0]:
+        for parameter in node.nodered_template[0]["parameters"]:
+            
+            parameter_node_id = parameter["node_id"]
+            parameter_tag = parameter["nametag"]
+            parameter_nodekey = parameter["nodekey"]
+            parameter_value = parameter["current_value"]
+
+            for nodered_node in nodered_flow:
+                if nodered_node["id"] == parameter_node_id:
+                    # If parameter is a part of a string (such as code), we replace simply the tag with strigified value.
+                    # If parametertag -is- the value, then we substitute the value itself
+
+                    # TODO: sanity check for type violations (corrupted template)
+                    
+                    if type(nodered_node[parameter_nodekey]) == str:
+                        if nodered_node[parameter_nodekey] == parameter_tag:
+                            nodered_node[parameter_nodekey] = parameter_value
+                        else:                            
+                            nodered_node[parameter_nodekey] = nodered_node[parameter_nodekey].replace(parameter_tag, str(parameter_value))
+                    
+                        
+
+
     nodered_flow_json = json.dumps(nodered_flow, indent=4)
 
     with open(output_file,"w") as json_file:
