@@ -1,204 +1,205 @@
-[
-    {
-        "id": "3e07ab041cb94785",
-        "type": "tab",
-        "label": "lorabridge flow",
-        "disabled": true,
-        "info": "True heros drink matcha.",
-        "env": []
-    },
-    {
-        "id": "2722c1c339534907",
-        "type": "mqtt in",
-        "z": "3e07ab041cb94785",
-        "name": "",
-        "topic": "",
-        "qos": "2",
-        "datatype": "auto-detect",
-        "broker": "0d4cf1425404ae49",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 340,
-        "y": 100,
-        "wires": [
-            [
-                "20e79641cffd46a3"
+{
+    "id": "97a79fb8848c446d",
+    "type": "tab",
+    "label": "lorabridge flow",
+    "disabled": true,
+    "info": "True heros drink matcha.",
+    "env": [],
+    "nodes": [
+        {
+            "id": "abcb62d6c58c47be",
+            "type": "mqtt in",
+            "z": "97a79fb8848c446d",
+            "name": "",
+            "topic": "zigbee2mqtt/0x54ef4410004dc531",
+            "qos": "2",
+            "datatype": "auto-detect",
+            "broker": "0d4cf1425404ae49",
+            "nl": false,
+            "rap": true,
+            "rh": 0,
+            "inputs": 0,
+            "x": 340,
+            "y": 100,
+            "wires": [
+                [
+                    "c0e7b5cf1c614acd"
+                ]
             ]
-        ]
-    },
-    {
-        "id": "92c3edf584944493",
-        "type": "mqtt in",
-        "z": "3e07ab041cb94785",
-        "name": "",
-        "topic": "",
-        "qos": "2",
-        "datatype": "auto-detect",
-        "broker": "0d4cf1425404ae49",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 340,
-        "y": 100,
-        "wires": [
-            [
-                "5092af7e1d9d4a7e"
+        },
+        {
+            "id": "3c72815cad0a4859",
+            "type": "mqtt in",
+            "z": "97a79fb8848c446d",
+            "name": "",
+            "topic": "zigbee2mqtt/0x00158d0007e3feb9",
+            "qos": "2",
+            "datatype": "auto-detect",
+            "broker": "0d4cf1425404ae49",
+            "nl": false,
+            "rap": true,
+            "rh": 0,
+            "inputs": 0,
+            "x": 340,
+            "y": 100,
+            "wires": [
+                [
+                    "7789054b749944a7"
+                ]
             ]
-        ]
-    },
-    {
-        "id": "ff2044adbb7e4d88",
-        "type": "mqtt out",
-        "z": "3e07ab041cb94785",
-        "name": "lb2_mqtt_out",
-        "topic": "zigbee2mqtt/insert_z2m_ID/set",
-        "qos": "",
-        "retain": "",
-        "respTopic": "",
-        "contentType": "",
-        "userProps": "",
-        "correl": "",
-        "expiry": "",
-        "broker": "0d4cf1425404ae49",
-        "x": 100,
-        "y": 100,
-        "wires": []
-    },
-    {
-        "id": "20e79641cffd46a3",
-        "type": "function",
-        "z": "3e07ab041cb94785",
-        "name": "state filter",
-        "func": "\nvar newMsg = { payload: msg.payload.occupancy};\nnewMsg.topic = \"binary_sensor\"\n\nreturn newMsg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 480,
-        "y": 540,
-        "wires": [
-            [
-                "62b775cb4b794727"
+        },
+        {
+            "id": "175fed134c544436",
+            "type": "mqtt out",
+            "z": "97a79fb8848c446d",
+            "name": "lb2_mqtt_out",
+            "topic": "zigbee2mqtt/0x54ef4410004dc531/set",
+            "qos": "",
+            "retain": "",
+            "respTopic": "",
+            "contentType": "",
+            "userProps": "",
+            "correl": "",
+            "expiry": "",
+            "broker": "0d4cf1425404ae49",
+            "x": 100,
+            "y": 100,
+            "wires": []
+        },
+        {
+            "id": "7789054b749944a7",
+            "type": "function",
+            "z": "97a79fb8848c446d",
+            "name": "state filter",
+            "func": "\nvar newMsg = { payload: msg.payload.occupancy};\nnewMsg.topic = \"binary_sensor\"\n\nreturn newMsg;",
+            "outputs": 1,
+            "timeout": 0,
+            "noerr": 0,
+            "initialize": "",
+            "finalize": "",
+            "libs": [],
+            "x": 480,
+            "y": 540,
+            "wires": [
+                [
+                    "68fd642619ee495b"
+                ]
             ]
-        ]
-    },
-    {
-        "id": "7ae4eff8ed5144f6",
-        "type": "inject",
-        "z": "3e07ab041cb94785",
-        "name": "timestamp every 1 second",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "1",
-        "crontab": "",
-        "once": true,
-        "onceDelay": 0.1,
-        "topic": "trigger",
-        "payload": "",
-        "payloadType": "date",
-        "x": 280,
-        "y": 240,
-        "wires": [
-            [
-                "62b775cb4b794727"
+        },
+        {
+            "id": "c4d896e5c38b461a",
+            "type": "inject",
+            "z": "97a79fb8848c446d",
+            "name": "timestamp every 1 second",
+            "props": [
+                {
+                    "p": "payload"
+                },
+                {
+                    "p": "topic",
+                    "vt": "str"
+                }
+            ],
+            "repeat": "1",
+            "crontab": "",
+            "once": true,
+            "onceDelay": 0.1,
+            "topic": "trigger",
+            "payload": "",
+            "payloadType": "date",
+            "x": 280,
+            "y": 240,
+            "wires": [
+                [
+                    "68fd642619ee495b"
+                ]
             ]
-        ]
-    },
-    {
-        "id": "62b775cb4b794727",
-        "type": "function",
-        "z": "3e07ab041cb94785",
-        "name": "countdown switch",
-        "func": "//let occupancy_state = flow.get(\"occupancy_state\")\nlet counter = flow.get(\"count\")\nvar newMsg = null;\n\n\n\nswitch(msg.topic) {\n    case \"binary_sensor\":\n             \n        if(msg.payload == true) {\n            \n            counter = 15;\n            flow.set(\"count\", counter);\n        }\n        break;\n    case \"trigger\":\n        \n        break;\n    default:\n        return newMsg;        \n}\n\nif(counter == 0) {\n    newMsg = { payload: \"OFF\" };\n}\nelse {    \n    counter--;\n    flow.set(\"count\",counter)\n    newMsg = { payload: \"ON\" };\n}\n\n\n\nreturn newMsg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "// Der Code hier wird ausgef\u00c3\u00bchrt,\n// wenn der Node gestartet wird\nflow.set(\"count\", 0);",
-        "finalize": "",
-        "libs": [],
-        "x": 620,
-        "y": 240,
-        "wires": [
-            [
-                "41094ba371894ac8"
+        },
+        {
+            "id": "68fd642619ee495b",
+            "type": "function",
+            "z": "97a79fb8848c446d",
+            "name": "countdown switch",
+            "func": "//let occupancy_state = flow.get(\"occupancy_state\")\nlet counter = flow.get(\"count\")\nvar newMsg = null;\n\n\n\nswitch(msg.topic) {\n    case \"binary_sensor\":\n             \n        if(msg.payload == true) {\n            \n            counter = 15;\n            flow.set(\"count\", counter);\n        }\n        break;\n    case \"trigger\":\n        \n        break;\n    default:\n        return newMsg;        \n}\n\nif(counter == 0) {\n    newMsg = { payload: \"OFF\" };\n}\nelse {    \n    counter--;\n    flow.set(\"count\",counter)\n    newMsg = { payload: \"ON\" };\n}\n\n\n\nreturn newMsg;",
+            "outputs": 1,
+            "timeout": 0,
+            "noerr": 0,
+            "initialize": "// Der Code hier wird ausgef\u00c3\u00bchrt,\n// wenn der Node gestartet wird\nflow.set(\"count\", 0);",
+            "finalize": "",
+            "libs": [],
+            "x": 620,
+            "y": 240,
+            "wires": [
+                [
+                    "71869b6b45ac4a19"
+                ]
             ]
-        ]
-    },
-    {
-        "id": "41094ba371894ac8",
-        "type": "function",
-        "z": "3e07ab041cb94785",
-        "name": "binary state transition",
-        "func": "let old_state = flow.get(\"switch_state\");\nlet new_state = msg.payload;\n\nvar newMsg = null;\n\nif (old_state == \"OFF\" && new_state == \"ON\") {\n    newMsg = { payload: \"{\\\"state\\\": \\\"ON\\\"}\" };\n}\n\nif (old_state == \"ON\" && new_state == \"OFF\") {\n    newMsg = { payload: \"{\\\"state\\\": \\\"OFF\\\"}\" };\n}\n\nreturn newMsg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 880,
-        "y": 240,
-        "wires": [
-            [
-                "ff2044adbb7e4d88"
+        },
+        {
+            "id": "71869b6b45ac4a19",
+            "type": "function",
+            "z": "97a79fb8848c446d",
+            "name": "binary state transition",
+            "func": "let old_state = flow.get(\"switch_state\");\nlet new_state = msg.payload;\n\nvar newMsg = null;\n\nif (old_state == \"OFF\" && new_state == \"ON\") {\n    newMsg = { payload: \"{\\\"state\\\": \\\"ON\\\"}\" };\n}\n\nif (old_state == \"ON\" && new_state == \"OFF\") {\n    newMsg = { payload: \"{\\\"state\\\": \\\"OFF\\\"}\" };\n}\n\nreturn newMsg;",
+            "outputs": 1,
+            "timeout": 0,
+            "noerr": 0,
+            "initialize": "",
+            "finalize": "",
+            "libs": [],
+            "x": 880,
+            "y": 240,
+            "wires": [
+                [
+                    "175fed134c544436"
+                ]
             ]
-        ]
-    },
-    {
-        "id": "5092af7e1d9d4a7e",
-        "type": "function",
-        "z": "3e07ab041cb94785",
-        "name": "state filter",
-        "func": "\nvar newMsg = { payload: msg.payload.state};\n\nnewMsg.topic = \"state\"\n\nreturn newMsg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 620,
-        "y": 100,
-        "wires": [
-            [
-                "871eab647ae049cc"
+        },
+        {
+            "id": "c0e7b5cf1c614acd",
+            "type": "function",
+            "z": "97a79fb8848c446d",
+            "name": "state filter",
+            "func": "\nvar newMsg = { payload: msg.payload.state};\n\nnewMsg.topic = \"state\"\n\nreturn newMsg;",
+            "outputs": 1,
+            "timeout": 0,
+            "noerr": 0,
+            "initialize": "",
+            "finalize": "",
+            "libs": [],
+            "x": 620,
+            "y": 100,
+            "wires": [
+                [
+                    "1e33cfe7f9194170"
+                ]
             ]
-        ]
-    },
-    {
-        "id": "871eab647ae049cc",
-        "type": "change",
-        "z": "3e07ab041cb94785",
-        "name": "",
-        "rules": [
-            {
-                "t": "set",
-                "p": "switch_state",
-                "pt": "flow",
-                "to": "payload",
-                "tot": "msg"
-            }
-        ],
-        "action": "",
-        "property": "",
-        "from": "",
-        "to": "",
-        "reg": false,
-        "x": 920,
-        "y": 100,
-        "wires": [
-            []
-        ]
-    }
-]
+        },
+        {
+            "id": "1e33cfe7f9194170",
+            "type": "change",
+            "z": "97a79fb8848c446d",
+            "name": "",
+            "rules": [
+                {
+                    "t": "set",
+                    "p": "switch_state",
+                    "pt": "flow",
+                    "to": "payload",
+                    "tot": "msg"
+                }
+            ],
+            "action": "",
+            "property": "",
+            "from": "",
+            "to": "",
+            "reg": false,
+            "x": 920,
+            "y": 100,
+            "wires": [
+                []
+            ]
+        }
+    ],
+    "configs": []
+}

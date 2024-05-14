@@ -3,7 +3,7 @@
     "description": "MQTT output",
     "id": "notset",
     "lb_device_id":"notset",
-    "type": "",
+    "type": "lb_mqtt_output",
     "inputs": ["9a1cdaf00db4384b"],
     "outputs": []
 },

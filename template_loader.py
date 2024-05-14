@@ -2,6 +2,7 @@
 
 import pycurl
 import json
+import redis
 import nodered_id_gen
 import LBflow
 from error_messages import error_messages
@@ -39,7 +40,7 @@ def compose_nodered_flow_to_json(flow : LBflow, output_file : str) -> int:
 
     fetch_nodered_mqtt_broker()
 
-    header = {"id": nodered_id_gen.generate_nodered_id(), "type":"tab", "label":"lorabridge flow", "disabled": True, "info": "True heros drink matcha.", "env": []}
+    header = {"id": nodered_id_gen.generate_nodered_id(), "type":"tab", "label":"lorabridge flow", "disabled": True, "info": "True heros drink matcha.", "env": [], "nodes": [], "configs": []}
 
     nodered_flow.append(header)
 
@@ -51,7 +52,15 @@ def compose_nodered_flow_to_json(flow : LBflow, output_file : str) -> int:
             if template_nodes["type"] == "mqtt in" or template_nodes["type"] == "mqtt out":
                 template_nodes["broker"] = nodered_mqtt_broker
 
-            nodered_flow.append(template_nodes)
+            if template_nodes["type"] == "mqtt in" and node.nodered_template[0]["type"] == "lb_mqtt_input":
+                template_nodes["topic"] = 'zigbee2mqtt/'+get_device_ieee_id(node.device_id)
+
+            # TODO: mqtt output topic should actually be defined in the template and not hardcoded here.
+
+            if template_nodes["type"] == "mqtt out" and node.nodered_template[0]["type"] == "lb_mqtt_output":
+                template_nodes["topic"] = 'zigbee2mqtt/'+get_device_ieee_id(node.device_id)+'/set'
+
+            nodered_flow[0]["nodes"].append(template_nodes)
 
         #nodered_flow.append(node.nodered_template[1:])
 
@@ -65,7 +74,7 @@ def compose_nodered_flow_to_json(flow : LBflow, output_file : str) -> int:
             parameter_nodekey = parameter["nodekey"]
             parameter_value = parameter["current_value"]
 
-            for nodered_node in nodered_flow:
+            for nodered_node in nodered_flow[0]["nodes"]:
                 if nodered_node["id"] == parameter_node_id:
                     # If parameter is a part of a string (such as code), we replace simply the tag with strigified value.
                     # If parametertag -is- the value, then we substitute the value itself
@@ -80,8 +89,7 @@ def compose_nodered_flow_to_json(flow : LBflow, output_file : str) -> int:
                     
                         
 
-
-    nodered_flow_json = json.dumps(nodered_flow, indent=4)
+    nodered_flow_json = json.dumps(nodered_flow[0], indent=4)
 
     with open(output_file,"w") as json_file:
         json_file.write(nodered_flow_json)
@@ -111,3 +119,11 @@ def fetch_nodered_mqtt_broker() -> int:
    
 
     return error_messages.MQTT_BROKER_NOT_FOUND
+
+def get_device_ieee_id(lb_id):
+
+    redis_client = redis.Redis(host='localhost', port=6379, db=0)
+
+    value = redis_client.hget('lorabridge:device:registry:id', lb_id)
+
+    return value.decode('utf-8')

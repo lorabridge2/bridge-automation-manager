@@ -1,6 +1,7 @@
 
 import json
 import array
+import redis
 
 from enum import IntEnum
 
@@ -160,7 +161,6 @@ def add_node(flow_id, node_id, node_type) -> int:
 
     return error_messages.NO_ERRORS
 
-# TODO: Add registration to redis, fetch nodered id and add nodered id to append
 
 def add_device(flow_id,node_id,node_type, lb_device) -> int:    
     
@@ -171,7 +171,15 @@ def add_device(flow_id,node_id,node_type, lb_device) -> int:
     if node_type not in list(map(int, node_bytes)):
         return error_messages.NODE_TYPE_NOT_FOUND
     
-    flows.nodes.append(LBdevice(node_id, node_type, lb_device))
+    if template_loader.get_device_ieee_id(lb_device) == None:
+        return error_messages.DEVICE_NOT_FOUND
+
+    new_device = LBdevice(node_id, node_type, lb_device)
+    new_device.nodered_template = template_loader.load_nodered_template(node_template_files_dictionary[node_type])
+    new_device.wires = [-1] * len(new_device.nodered_template[0]["outputs"])
+    new_device.device_id = lb_device
+
+    _flow.nodes.append(new_device)
     
     return error_messages.NO_ERRORS
 
@@ -365,15 +373,15 @@ compressed_commands.append([9, 0])
 
 # add MQTT input for switch state
 
-compressed_commands.append([1, 0, 0, 3])
+compressed_commands.append([2, 0, 0, 3, 1])
 
 # add MQTT input for occupancy sensor
 
-compressed_commands.append([1, 0, 1, 3])
+compressed_commands.append([2, 0, 1, 3, 6])
 
 # add MQTT output for switch
 
-compressed_commands.append([1, 0, 2, 1])
+compressed_commands.append([2, 0, 2, 1, 1])
 
 # add timed switch
 
