@@ -4,7 +4,7 @@ import array
 import redis
 
 from enum import IntEnum
-
+from redis_queue_listener import RedisQueueListener
 
 from error_messages import error_messages
 from LBnode import LBnode
@@ -306,6 +306,17 @@ def parse_compressed_command(command) -> int:
             flow_id = command[command_byte_structures["add_flow"]["flow_id"]]
             add_flow(flow_id)
 
+        case action_bytes.FLOW_COMPLETE:
+
+            # TODO: This sanity check does not really work if we plan to use more than bytes in commands!!!
+
+            if len(command) is not len(command_byte_structures["flow_complete"]):
+                return error_messages.COMMAND_MALFORMED 
+
+            flow_id = command[command_byte_structures["flow_complete"]["flow_id"]]
+            
+            export_nodered_flow("lorawan_experiment.json")
+
         case action_bytes.ADD_NODE:
             if len(command) is not len(command_byte_structures["add_node"]):
                 return error_messages.COMMAND_MALFORMED
@@ -368,49 +379,28 @@ def parse_compressed_command(command) -> int:
             return err
         #"connect_node": {"action_byte": 0, "flow_id": 1, "output_node": 2,"output":3, "input_node": 4, "input": 5}
 
-# add flow
-compressed_commands.append([9, 0])
 
-# add MQTT input for switch state
-
-compressed_commands.append([2, 0, 0, 3, 1])
-
-# add MQTT input for occupancy sensor
-
-compressed_commands.append([2, 0, 1, 3, 6])
-
-# add MQTT output for switch
-
-compressed_commands.append([2, 0, 2, 1, 1])
-
-# add timed switch
-
-compressed_commands.append([1, 0, 3, 10])
-
-# connect switch state to switch node
-
-compressed_commands.append([4, 0, 0, 0, 3, 0])
-
-# connect occupancy state to switch node
-
-compressed_commands.append([4, 0, 1, 0, 3, 1])
-
-# connect timed switch to MQTT output
-
-compressed_commands.append([4, 0, 3, 0, 2, 0])
-
-# update countdown parameter 
-
-#parameter_update(flow_id, node_id, parameter_id, num_bytes, parameter_type, raw_bytes)
-
-compressed_commands.append([3, 0, 3, 0, 1, parameter_data_types.INTEGER, 15])
-
-for cmd in compressed_commands:
-    parse_compressed_command(cmd)
-
-#print(flows[0].nodes[1].id)
 
 # How to get active flow nodered json: curl -X GET -H "Accept: application/json" http://10.203.14.242:1880/flows -o active_flow.json
 
-export_nodered_flow("switch_experiment.json")
+
+def process_downlink_data(data):
+    print("Processing downlink data")
+    # This function can be customized to process the received data
+    data2 = data.decode('utf-8')
+    cmd_array = bytearray.fromhex(data2)
+    parse_compressed_command(cmd_array)
+
+if __name__ == "__main__":
+    # Replace 'my_queue' with the name of your Redis queue
+    queue_listener = RedisQueueListener("__keyspace@0__:lbcommands", process_downlink_data)
+    queue_listener.start()
+
+    
+    # Keep the main thread alive
+    try:
+        while True:
+            pass
+    except KeyboardInterrupt:
+        pass
 

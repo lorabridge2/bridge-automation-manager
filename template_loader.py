@@ -14,6 +14,8 @@ from io import BytesIO
 nodered_address = "10.203.14.242:1880"
 nodered_mqtt_broker = ""
 
+redis_address = '10.203.14.242'
+
 def load_nodered_template(template_filename : str) -> dict:
     nr_template_dict = {}
 
@@ -122,7 +124,9 @@ def fetch_nodered_mqtt_broker() -> int:
 
 def get_device_ieee_id(lb_id):
 
-    redis_client = redis.Redis(host='localhost', port=6379, db=0)
+    global redis_address
+
+    redis_client = redis.Redis(host=redis_address, port=6379, db=0)
 
     value = redis_client.hget('lorabridge:device:registry:id', lb_id)
 
