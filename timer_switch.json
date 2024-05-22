@@ -1,0 +1,131 @@
+[
+    {
+        "description": "Switches binary device on based on a given time window",
+        "id": "notgenerated",
+        "type": "lb_timer_switch",        
+        "inputs": ["07ac1efe0113bdb9"],
+        "outputs": ["b7f4eda14c6d48f7"],
+        "input_descriptions": ["binary devices state"],
+        "output_descriptions": ["timer state"],        
+        "parameters": [        
+                {
+                    "nametag": "lb_timerswitch_hour_min",
+                    "current_value": 0,
+                    "node_id": "b7f4eda14c6d48f7",
+                    "nodekey": "func"
+                },
+                {
+                    "nametag": "lb_timerswitch_hour_max",
+                    "current_value": 0,
+                    "node_id": "b7f4eda14c6d48f7",
+                    "nodekey": "func"
+                },
+                {
+                    "nametag": "lb_timerswitch_minute_min",
+                    "current_value": 0,
+                    "node_id": "b7f4eda14c6d48f7",
+                    "nodekey": "func"
+                },
+                {
+                    "nametag": "lb_timerswitch_minute_max",
+                    "current_value": 0,
+                    "node_id": "b7f4eda14c6d48f7",
+                    "nodekey": "func"
+                }                     
+        ]
+    },        
+    {
+        "id": "9dbb611ccc7d9af8",
+        "type": "inject",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "time",
+        "payload": "",
+        "payloadType": "date",
+        "x": 300,
+        "y": 560,
+        "wires": [
+            [
+                "b7f4eda14c6d48f7"
+            ]
+        ]
+    },
+    {
+        "id": "b7f4eda14c6d48f7",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Timer switch",
+        "func": "let unix_timestamp = msg.payload;\n\nlet old_state = flow.get(\"switch_state\")\n\nlet set_hour_min = lb_timerswitch_hour_min;\nlet set_minute_min = lb_timerswitch_minute_min;\n\nlet set_hour_max = lb_timerswitch_hour_max;\nlet set_minute_max = lb_timerswitch_minute_max;\n\n\nlet date = new Date(unix_timestamp);\n\nlet current_hour = date.getHours();\nlet current_minute = date.getMinutes();\n\n\nvar newMsg = null;\n\nif (current_hour >= set_hour_min && current_hour <= set_hour_max && current_minute >= set_minute_min && current_minute <= set_minute_max) {\n    if (old_state == \"OFF\")\n        newMsg = { payload: \"{\\\"state\\\": \\\"ON\\\"}\"}\n}\nelse {\n    if (old_state == \"ON\")\n        newMsg = { payload: \"{\\\"state\\\": \\\"OFF\\\"}\" }\n}\n\n\nreturn newMsg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 570,
+        "y": 560,
+        "wires": [
+            [
+                "notset"
+            ]
+        ]
+    },
+    {
+        "id": "07ac1efe0113bdb9",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "state filter",
+        "func": "\nvar newMsg = { payload: msg.payload.state};\n\nnewMsg.topic = \"state\"\n\nreturn newMsg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 380,
+        "wires": [
+            [
+                "c6e21b90bc6e9bcf"
+            ]
+        ]
+    },
+    {
+        "id": "c6e21b90bc6e9bcf",
+        "type": "change",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "switch_state",
+                "pt": "flow",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 840,
+        "y": 380,
+        "wires": [
+            []
+        ]
+    }
+]

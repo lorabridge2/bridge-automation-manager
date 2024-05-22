@@ -78,13 +78,14 @@ node_type_dictionary = {
     "alert": 5,
     "logic_and": 6,
     "logic_or": 7,
-    "timed_switch": 8,
+    "timer_switch": 8,
     "thermostat": 9,
     "countdown_switch": 10
 }
 
 node_template_files_dictionary = {
     node_type_dictionary["countdown_switch"] : "countdown_switch.json",
+    node_type_dictionary["timer_switch"]: "timer_switch.json",
     node_type_dictionary["binary_device"] : "mqtt_out.json",
     node_type_dictionary["binary_sensor"] : "mqtt_in.json"
 }
@@ -99,7 +100,7 @@ class node_bytes(IntEnum):
     ALERT = node_type_dictionary["alert"]
     LOGIC_AND = node_type_dictionary["logic_and"]
     LOGIC_OR = node_type_dictionary["logic_or"]
-    TIMED_SWITCH = node_type_dictionary["timed_switch"]
+    TIMER_SWITCH = node_type_dictionary["timer_switch"]
     THERMOSTAT = node_type_dictionary["thermostat"]
     COUNTDOWN_SWITCH = node_type_dictionary["countdown_switch"]
 
