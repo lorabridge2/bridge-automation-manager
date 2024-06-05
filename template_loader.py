@@ -43,7 +43,7 @@ def load_nodered_template(template_filename: str) -> dict:
         return json.loads(nr_old_template)
 
 
-def compose_nodered_flow_to_json(flow: LBflow, output_file: str) -> int:
+def compose_nodered_flow_to_json(flow: LBflow, output_file: str) -> None:
     nodered_flow = []
 
     fetch_nodered_mqtt_broker()
@@ -123,8 +123,6 @@ def compose_nodered_flow_to_json(flow: LBflow, output_file: str) -> int:
 
     with open(output_file, "w") as json_file:
         json_file.write(nodered_flow_json)
-
-    return 0
 
 
 def fetch_nodered_mqtt_broker() -> int:

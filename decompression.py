@@ -281,11 +281,6 @@ def remove_node(flow_id, node_id) -> int:
     return error_messages.NO_ERRORS
 
 
-def export_nodered_flow(filename: str) -> int:
-    err = template_loader.compose_nodered_flow_to_json(flows[0], filename)
-    return err
-
-
 def parse_compressed_command(command) -> int:
     # Sanity checks:
 
@@ -325,7 +320,9 @@ def parse_compressed_command(command) -> int:
 
             flow_id = command[command_byte_structures["flow_complete"]["flow_id"]]
 
-            export_nodered_flow("lorawan_experiment.json")
+            template_loader.compose_nodered_flow_to_json(
+                flows[0], "lorawan_experiment.json"
+            )
 
         case action_bytes.ADD_NODE:
             if len(command) is not len(command_byte_structures["add_node"]):
