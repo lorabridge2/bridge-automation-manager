@@ -278,7 +278,9 @@ def parameter_update(
 
 
 def remove_node(flow_id, node_id) -> int:
-    return error_messages.NO_ERRORS
+    # return error_messages.NO_ERRORS
+    # TODO IMPLEMENT, not return all ok
+    raise NotImplementedError()
 
 
 def parse_compressed_command(command) -> int:
