@@ -13,8 +13,6 @@ from LBdevice import LBdevice
 
 import template_loader
 
-ENABLE_DEBUG = 0
-
 # Action bytes:
 # 0 - Remove node
 # 1 - Add node
@@ -37,33 +35,19 @@ new_node = LBnode(1, 2)
 
 # TODO: These should not be hard coded, but loaded from a config file (json?)
 
-action_byte_dictionary = {
-    "remove_node": 0,
-    "add_node": 1,
-    "add_device": 2,
-    "parameter_update": 3,
-    "connect_node": 4,
-    "disconnect_node": 5,
-    "enable_flow": 6,
-    "disable_flow": 7,
-    "time_sync_response": 8,
-    "add_flow": 9,
-    "flow_complete": 10,
-}
-
 
 class action_bytes(IntEnum):
-    REMOVE_NODE = action_byte_dictionary["remove_node"]
-    ADD_NODE = action_byte_dictionary["add_node"]
-    ADD_DEVICE = action_byte_dictionary["add_device"]
-    PARAMETER_UPDATE = action_byte_dictionary["parameter_update"]
-    CONNECT_NODE = action_byte_dictionary["connect_node"]
-    DISCONNECT_NODE = action_byte_dictionary["disconnect_node"]
-    ENABLE_FLOW = action_byte_dictionary["enable_flow"]
-    DISABLE_FLOW = action_byte_dictionary["disable_flow"]
-    TIME_SYNC_RESPONSE = action_byte_dictionary["time_sync_response"]
-    ADD_FLOW = action_byte_dictionary["add_flow"]
-    FLOW_COMPLETE = action_byte_dictionary["flow_complete"]
+    REMOVE_NODE = 0
+    ADD_NODE = 1
+    ADD_DEVICE = 2
+    PARAMETER_UPDATE = 3
+    CONNECT_NODE = 4
+    DISCONNECT_NODE = 5
+    ENABLE_FLOW = 6
+    DISABLE_FLOW = 7
+    TIME_SYNC_RESPONSE = 8
+    ADD_FLOW = 9
+    FLOW_COMPLETE = 10
 
 
 class parameter_data_types(IntEnum):
@@ -73,40 +57,27 @@ class parameter_data_types(IntEnum):
     STRING = 3
 
 
-node_type_dictionary = {
-    "binary_device": 1,
-    "hybrid_device": 2,
-    "binary_sensor": 3,
-    "numeric_sensor": 4,
-    "alert": 5,
-    "logic_and": 6,
-    "logic_or": 7,
-    "timer_switch": 8,
-    "thermostat": 9,
-    "countdown_switch": 10,
-}
+class node_bytes(IntEnum):
+    BINARY_DEVICE = 1
+    HYBRID_DEVICE = 2
+    BINARY_SENSOR = 3
+    NUMERIC_SENSOR = 4
+    ALERT = 5
+    LOGIC_AND = 6
+    LOGIC_OR = 7
+    TIMER_SWITCH = 8
+    THERMOSTAT = 9
+    COUNTDOWN_SWITCH = 10
+
 
 node_template_files_dictionary = {
-    node_type_dictionary["countdown_switch"]: "countdown_switch.json",
-    node_type_dictionary["timer_switch"]: "timer_switch.json",
-    node_type_dictionary["binary_device"]: "mqtt_out.json",
-    node_type_dictionary["binary_sensor"]: "mqtt_in.json",
+    node_bytes.COUNTDOWN_SWITCH.value: "countdown_switch.json",
+    node_bytes.TIMER_SWITCH.value: "timer_switch.json",
+    node_bytes.BINARY_DEVICE.value: "mqtt_out.json",
+    node_bytes.BINARY_SENSOR.value: "mqtt_in.json",
 }
 
 # Same as above
-
-
-class node_bytes(IntEnum):
-    BINARY_DEVICE = node_type_dictionary["binary_device"]
-    HYBRID_DEVICE = node_type_dictionary["hybrid_device"]
-    BINARY_SENSOR = node_type_dictionary["binary_sensor"]
-    NUMERIC_SENSOR = node_type_dictionary["numeric_sensor"]
-    ALERT = node_type_dictionary["alert"]
-    LOGIC_AND = node_type_dictionary["logic_and"]
-    LOGIC_OR = node_type_dictionary["logic_or"]
-    TIMER_SWITCH = node_type_dictionary["timer_switch"]
-    THERMOSTAT = node_type_dictionary["thermostat"]
-    COUNTDOWN_SWITCH = node_type_dictionary["countdown_switch"]
 
 
 # TODO: Need more fine grained description with byte index and width in bytes
