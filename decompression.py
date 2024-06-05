@@ -452,10 +452,11 @@ if __name__ == "__main__":
         process_downlink_data,
     )
     queue_listener.start()
+    queue_listener.join()
 
-    # Keep the main thread alive
-    try:
-        while True:
-            pass
-    except KeyboardInterrupt:
-        pass
+    # # Keep the main thread alive
+    # try:
+    #     while True:
+    #         pass
+    # except KeyboardInterrupt:
+    #     pass
