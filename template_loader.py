@@ -1,13 +1,12 @@
 # TODO: Rename to nodered_template_manager
 
-import pycurl
 import json
 import redis
 import nodered_id_gen
 import LBflow
 from error_messages import error_messages
-from io import BytesIO
 import os
+import urllib
 
 # TODO: replace eth to localhost later on bridge
 
@@ -129,16 +128,11 @@ def fetch_nodered_mqtt_broker() -> int:
 
     global nodered_mqtt_broker
 
-    buffer = BytesIO()
-    c = pycurl.Curl()
-    c.setopt(c.URL, ":".join((NODERED_HOST, NODERED_PORT)) + "/flow/global")
-    c.setopt(c.WRITEDATA, buffer)
-    c.perform()
-    c.close()
-
-    body = buffer.getvalue()
-    body = body.decode("utf-8")
-    response_json = json.loads(body)
+    response_json = json.loads(
+        urllib.request.urlopen(f"http://{NODERED_HOST}:{NODERED_PORT}/flow/global")
+        .read()
+        .decode("utf-8")
+    )
 
     for config in response_json["configs"]:
         if config["type"] == "mqtt-broker":
