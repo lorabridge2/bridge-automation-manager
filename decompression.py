@@ -13,19 +13,6 @@ from LBdevice import LBdevice
 
 import template_loader
 
-# Action bytes:
-# 0 - Remove node
-# 1 - Add node
-# 2 - Add device
-# 3 - Parameter update
-# 4 - Connect node
-# 5 - Disconnect node
-# 6 - Enable flow
-# 7 - Disable flow
-# 8 - Time sync response
-# 9 - Add flow
-# 10 - Flow complete
-
 flows = []
 compressed_commands = []
 debug_print = True

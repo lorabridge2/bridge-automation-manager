@@ -3,5 +3,4 @@ class LBflow:
         self.id = id
         self.nodes = []
         self.iscomplete = False
-        self.underconstruction = True
     
