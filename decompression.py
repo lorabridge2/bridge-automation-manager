@@ -2,6 +2,7 @@ import json
 import array
 import redis
 import os
+import time
 
 from enum import IntEnum
 from redis_queue_listener import RedisQueueListener
@@ -58,10 +59,10 @@ class node_bytes(IntEnum):
 
 
 node_template_files_dictionary = {
-    node_bytes.COUNTDOWN_SWITCH.value: "countdown_switch.json",
+    node_bytes.COUNTDOWN_SWITCH.value: "countdown_switch_new.json",
     node_bytes.TIMER_SWITCH.value: "timer_switch.json",
-    node_bytes.BINARY_DEVICE.value: "mqtt_out.json",
-    node_bytes.BINARY_SENSOR.value: "mqtt_in.json",
+    node_bytes.BINARY_DEVICE.value: "mqtt_out_binary.json",
+    node_bytes.BINARY_SENSOR.value: "mqtt_in_binary.json",
 }
 
 # Same as above
@@ -80,6 +81,7 @@ command_byte_structures = {
         "node_id": 2,
         "node_type": 3,
         "lb_device": 4,
+        "lb_attribute": 5,
     },
     "connect_node": {
         "action_byte": 0,
@@ -152,7 +154,7 @@ def add_node(flow_id, node_id, node_type) -> int:
     return error_messages.NO_ERRORS
 
 
-def add_device(flow_id, node_id, node_type, lb_device) -> int:
+def add_device(flow_id, node_id, node_type, lb_device, lb_attribute) -> int:
 
     _flow = seek_flow(flow_id)
     if _flow == None:
@@ -164,12 +166,13 @@ def add_device(flow_id, node_id, node_type, lb_device) -> int:
     if template_loader.get_device_ieee_id(lb_device) == None:
         return error_messages.DEVICE_NOT_FOUND
 
-    new_device = LBdevice(node_id, node_type, lb_device)
+    new_device = LBdevice(node_id, node_type, lb_device, lb_attribute)
     new_device.nodered_template = template_loader.load_nodered_template(
         node_template_files_dictionary[node_type]
     )
     new_device.wires = [-1] * len(new_device.nodered_template[0]["outputs"])
     new_device.device_id = lb_device
+    new_device.device_attribute = lb_attribute
 
     _flow.nodes.append(new_device)
 
@@ -334,7 +337,8 @@ def parse_compressed_command(command) -> int:
             node_id = command[command_byte_structures["add_device"]["node_id"]]
             node_type = command[command_byte_structures["add_device"]["node_type"]]
             lb_device = command[command_byte_structures["add_device"]["lb_device"]]
-            err = add_device(flow_id, node_id, node_type, lb_device)
+            lb_attribute = command[command_byte_structures["add_device"]["lb_attribute"]]
+            err = add_device(flow_id, node_id, node_type, lb_device, lb_attribute)
             return err
 
         case action_bytes.CONNECT_NODE:
@@ -408,12 +412,16 @@ if __name__ == "__main__":
         },
         process_downlink_data,
     )
+    
     queue_listener.start()
-    queue_listener.join()
+    #queue_listener.join()
 
     # # Keep the main thread alive
-    # try:
-    #     while True:
-    #         pass
-    # except KeyboardInterrupt:
-    #     pass
+    # 
+    # Zombie code below activated just to enable Keyboard interrupt ;) -Haru
+
+    try:
+        while True:
+            time.sleep(1000)
+    except KeyboardInterrupt:
+        pass

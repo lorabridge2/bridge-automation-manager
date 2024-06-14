@@ -4,7 +4,9 @@ import json
 import redis
 import nodered_id_gen
 import LBflow
+import paho.mqtt.subscribe as subscribe
 from error_messages import error_messages
+import device_classes
 import os
 import urllib
 
@@ -74,17 +76,34 @@ def compose_nodered_flow_to_json(flow: LBflow, output_file: str) -> None:
             if (
                 template_nodes["type"] == "mqtt in"
                 and node.nodered_template[0]["type"] == "lb_mqtt_input"
+                or node.nodered_template[0]["type"] == "lb_mqtt_input_binary"
             ):
+                node.nodered_template[0]["parameters"][2]["current_value"] = device_classes.DEVICE_CLASSES[node.device_attribute]
+                
                 template_nodes["topic"] = "zigbee2mqtt/" + get_device_ieee_id(
                     node.device_id
                 )
+            
+            if (node.nodered_template[0]["type"] == "lb_mqtt_input_binary"):
+                boolean_attributes = get_boolean_definitions_ieee_id(get_device_ieee_id(node.device_id), device_classes.DEVICE_CLASSES[node.device_attribute])
+                #print(node)
+                #print(device_classes.DEVICE_CLASSES[node.device_attribute])
+                #print(boolean_attributes)
+                if isinstance(boolean_attributes["value_on"], str):
+                    node.nodered_template[0]["parameters"][0]["current_value"] = "\'" + boolean_attributes["value_on"] + "\'"
+                    node.nodered_template[0]["parameters"][1]["current_value"] = "\'" + boolean_attributes["value_off"] + "\'"
+                else:
+                    node.nodered_template[0]["parameters"][0]["current_value"] = boolean_attributes["value_on"]
+                    node.nodered_template[0]["parameters"][1]["current_value"] = boolean_attributes["value_off"]
 
             # TODO: mqtt output topic should actually be defined in the template and not hardcoded here.
 
             if (
                 template_nodes["type"] == "mqtt out"
                 and node.nodered_template[0]["type"] == "lb_mqtt_output"
+                or node.nodered_template[0]["type"] == "lb_mqtt_output_binary"
             ):
+                node.nodered_template[0]["parameters"][2]["current_value"] = device_classes.DEVICE_CLASSES[node.device_attribute]
                 template_nodes["topic"] = (
                     "zigbee2mqtt/" + get_device_ieee_id(node.device_id) + "/set"
                 )
@@ -93,30 +112,33 @@ def compose_nodered_flow_to_json(flow: LBflow, output_file: str) -> None:
 
         # nodered_flow.append(node.nodered_template[1:])
 
-    # Check for parameters to be updated/initialized
+        # Check for parameters to be updated/initialized
 
-    if "parameters" in node.nodered_template[0]:
-        for parameter in node.nodered_template[0]["parameters"]:
 
-            parameter_node_id = parameter["node_id"]
-            parameter_tag = parameter["nametag"]
-            parameter_nodekey = parameter["nodekey"]
-            parameter_value = parameter["current_value"]
 
-            for nodered_node in nodered_flow[0]["nodes"]:
-                if nodered_node["id"] == parameter_node_id:
-                    # If parameter is a part of a string (such as code), we replace simply the tag with strigified value.
-                    # If parametertag -is- the value, then we substitute the value itself
+        if "parameters" in node.nodered_template[0]:
+            #print("Updating parameters for ", node.nodered_template[0]["description"])
+            for parameter in node.nodered_template[0]["parameters"]:
 
-                    # TODO: sanity check for type violations (corrupted template)
+                parameter_node_id = parameter["node_id"]
+                parameter_tag = parameter["nametag"]
+                parameter_nodekey = parameter["nodekey"]
+                parameter_value = parameter["current_value"]
 
-                    if type(nodered_node[parameter_nodekey]) == str:
-                        if nodered_node[parameter_nodekey] == parameter_tag:
-                            nodered_node[parameter_nodekey] = parameter_value
-                        else:
-                            nodered_node[parameter_nodekey] = nodered_node[
-                                parameter_nodekey
-                            ].replace(parameter_tag, str(parameter_value))
+                for nodered_node in nodered_flow[0]["nodes"]:
+                    if nodered_node["id"] == parameter_node_id:
+                        # If parameter is a part of a string (such as code), we replace simply the tag with strigified value.
+                        # If parametertag -is- the value, then we substitute the value itself
+
+                        # TODO: sanity check for type violations (corrupted template)
+
+                        if type(nodered_node[parameter_nodekey]) == str:
+                            if nodered_node[parameter_nodekey] == parameter_tag:
+                                nodered_node[parameter_nodekey] = parameter_value
+                            else:
+                                nodered_node[parameter_nodekey] = nodered_node[
+                                    parameter_nodekey
+                                ].replace(parameter_tag, str(parameter_value))
 
     nodered_flow_json = json.dumps(nodered_flow[0], indent=4)
 
@@ -149,3 +171,33 @@ def get_device_ieee_id(lb_id):
     value = redis_client.hget("lorabridge:device:registry:id", lb_id)
 
     return value.decode("utf-8")
+
+def get_boolean_definitions_ieee_id(ieee_id, attribute):
+    
+    m = subscribe.simple("zigbee2mqtt/bridge/devices", hostname=REDIS_HOST)
+
+    raw_payload = m.payload
+    received_items = json.loads(raw_payload)
+    #ieee_id = "0x54ef4410004dc531"
+    #attribute = "state"
+
+    for items in received_items:
+        if "friendly_name" in items:
+            #print(items)
+            if items["friendly_name"] == ieee_id and "definition" in items:
+                
+                if "exposes" in items["definition"]:
+                    for exposed_attributes in items["definition"]["exposes"]:
+                        # Generic binary sensor
+                        if "property" in exposed_attributes and "type" in exposed_attributes and "value_on" in exposed_attributes and "value_off" in exposed_attributes:
+                            if attribute in exposed_attributes["property"] and exposed_attributes["type"] == "binary":
+                                #print({"value_on": exposed_attributes["value_on"], "value_off": exposed_attributes["value_off"]})
+                                return {"value_on": exposed_attributes["value_on"], "value_off": exposed_attributes["value_off"]}
+                        # Switch
+                        if "type" in exposed_attributes and "features" in exposed_attributes:
+                            if exposed_attributes["type"] == "switch":
+                                for exposed_features in exposed_attributes["features"]:
+                                    if "property" in exposed_features and "type" in exposed_features and "value_on" in exposed_features and "value_off" in exposed_features:
+                                        if attribute in exposed_features["property"]:
+                                            return {"value_on": exposed_features["value_on"], "value_off": exposed_features["value_off"]}
+    return {}

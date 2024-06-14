@@ -1,0 +1,86 @@
+[
+    {
+        "description": "Receives binary input and holds the state for a given time",
+        "id": "notgenerated",
+        "type": "lb_countdown_switch",
+        "inputs": ["a844f495c824780c", "4d538f6d3957ef69"],
+        "outputs": ["dcc55baf0f0a74e9"],
+        "parameters": [        
+                {
+                    "nametag": "lb_countdown_value",
+                    "current_value": 5,
+                    "node_id": "4d538f6d3957ef69",
+                    "nodekey": "func"
+                }                 
+        ]
+    },
+    {
+        "id": "1c406c472b3b1c22",
+        "type": "inject",
+        "z": "8828d12f94d26d03",
+        "name": "timestamp every 1 second",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "trigger",
+        "payload": "",
+        "payloadType": "date",
+        "x": 380,
+        "y": 360,
+        "wires": [
+            [
+                "4d538f6d3957ef69"
+            ]
+        ]
+    },
+    {
+        "id": "4d538f6d3957ef69",
+        "type": "function",
+        "z": "8828d12f94d26d03",
+        "name": "countdown switch",
+        "func": "\nlet counter = context.get(\"count\")\nvar newMsg = null;\n\n\n\nswitch(msg.topic) {\n\n    case \"binary_state\":\n             \n        if(msg.payload == true) {\n            \n            counter = lb_countdown_value;\n            context.set(\"count\", counter);\n        }\n        break;\n    case \"trigger\":\n        \n        break;\n    default:\n        return newMsg;        \n}\n\nif(counter == 0) {\n    newMsg = { payload: false };\n}\nelse {    \n    counter--;\n    context.set(\"count\",counter)\n    newMsg = { payload: true };\n}\n\n\n\nreturn newMsg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "// Der Code hier wird ausgeführt,\n// wenn der Node gestartet wird\n\ncontext.set(\"count\", 0);",
+        "finalize": "",
+        "libs": [],
+        "x": 750,
+        "y": 360,
+        "wires": [
+            [
+                "a844f495c824780c"
+            ]
+        ]
+    },
+    {
+        "id": "a844f495c824780c",
+        "type": "function",
+        "z": "8828d12f94d26d03",
+        "name": "binary state transition",
+        "func": "if (msg.topic == \"binary_state\") {\n    context.set(\"binary_state\", msg.payload);\n    return;\n}\n\nlet old_state = context.get(\"binary_state\");\nlet new_state = msg.payload;\n\nvar newMsg = null;\n\nif (old_state == false && new_state == true) {\n    newMsg = { payload: true };\n}\n\nif (old_state == true && new_state == false) {\n    newMsg = { payload: false };\n}\n\n\nreturn newMsg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1020,
+        "y": 360,
+        "wires": [
+            [
+                "notset"
+            ]
+        ]
+    }
+]

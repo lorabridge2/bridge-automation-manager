@@ -1,0 +1,73 @@
+[
+    {
+        "description": "MQTT binary input",
+        "id": "notset",
+        "lb_device_id":"notset",
+        "lb_attribute_id":"notset",
+        "type": "lb_mqtt_input_binary",
+        "inputs": [],
+        "outputs": ["c825de83715d8468"],
+        "parameters": [        
+            {
+                "nametag": "lb_boolean_true",
+                "current_value": true,
+                "node_id": "c825de83715d8468",
+                "nodekey": "func"
+            },
+            {
+                "nametag": "lb_boolean_false",
+                "current_value": false,
+                "node_id": "c825de83715d8468",
+                "nodekey": "func"
+            },
+            {
+                "nametag": "lb_device_attribute",
+                "current_value": "state",
+                "node_id": "c825de83715d8468",
+                "nodekey": "func"
+            }
+
+        ]
+    },
+    {
+        "id": "0fe3cb89b87e9ea7",
+        "type": "mqtt in",
+        "z": "",
+        "name": "",
+        "topic": "",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 520,
+        "y": 380,
+        "wires": [
+            [
+                "c825de83715d8468"
+            ]
+        ]
+    },
+    {
+        "id": "c825de83715d8468",
+        "type": "function",
+        "z": "16bd3c11959482c1",
+        "name": " input state filter",
+        "func": "\nvar newMsg;\n\n if(msg.payload.lb_device_attribute == lb_boolean_true) {\n    newMsg = { payload: true};\n}\nelse if(msg.payload.lb_device_attribute == lb_boolean_false) {\n    newMsg = { payload: false};\n}\n\nnewMsg.topic = \"binary_state\"\n\nreturn newMsg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 820,
+        "y": 380,
+        "wires": [
+            [
+                "notset"
+            ]
+        ]
+    }
+]

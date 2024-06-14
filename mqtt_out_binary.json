@@ -1,0 +1,69 @@
+[
+    {
+        "description": "MQTT output",
+        "id": "notset",
+        "lb_device_id":"notset",
+        "lb_attribute_id":"notset",
+        "type": "lb_mqtt_output_binary",
+        "inputs": ["0e617a38c5a5b2b3"],
+        "outputs": [],
+        "parameters": [        
+            {
+                "nametag": "lb_boolean_true",
+                "current_value": true,
+                "node_id": "0e617a38c5a5b2b3",
+                "nodekey": "func"
+            },
+            {
+                "nametag": "lb_boolean_false",
+                "current_value": false,
+                "node_id": "0e617a38c5a5b2b3",
+                "nodekey": "func"
+            },
+            {
+                "nametag": "lb_device_attribute",
+                "current_value": "state",
+                "node_id": "0e617a38c5a5b2b3",
+                "nodekey": "func"
+            }
+        ]
+    },
+    {
+        "id": "c7e13bfc39ddf92b",
+        "type": "mqtt out",
+        "z": "",
+        "name": "",
+        "topic": "zigbee2mqtt/insert_z2m_ID/set",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "",
+        "x": 760,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "0e617a38c5a5b2b3",
+        "type": "function",
+        "z": "",
+        "name": "output state generation",
+        "func": "var newMsg;\n\n if(msg.payload == true) {\n    newMsg = { payload: \"{lb_device_attribute: lb_boolean_true}\" };\n}\nelse {\n    newMsg = { payload: \"{lb_device_attribute: lb_boolean_false}\" };\n}\n\nreturn newMsg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 320,
+        "wires": [
+            [
+                "c7e13bfc39ddf92b"
+            ]
+        ]
+    }
+]

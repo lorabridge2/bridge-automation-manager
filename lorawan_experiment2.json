@@ -1,0 +1,144 @@
+{
+    "id": "5b9b7ee8f004a96",
+    "type": "tab",
+    "label": "lorabridge flow",
+    "disabled": true,
+    "info": "True heros drink matcha.",
+    "env": [],
+    "nodes": [
+        {
+            "id": "2bc1484244a4d95",
+            "type": "mqtt in",
+            "z": "5b9b7ee8f004a96",
+            "name": "",
+            "topic": "zigbee2mqtt/0x54ef4410004dc531",
+            "qos": "2",
+            "datatype": "auto-detect",
+            "broker": "0d4cf1425404ae49",
+            "nl": false,
+            "rap": true,
+            "rh": 0,
+            "inputs": 0,
+            "x": 340,
+            "y": 100,
+            "wires": [
+                [
+                    "4302a9f7f84d47eb"
+                ]
+            ]
+        },
+        {
+            "id": "e0014c01f8d94af1",
+            "type": "mqtt out",
+            "z": "5b9b7ee8f004a96",
+            "name": "lb2_mqtt_out",
+            "topic": "zigbee2mqtt/0x54ef4410004dc531/set",
+            "qos": "",
+            "retain": "",
+            "respTopic": "",
+            "contentType": "",
+            "userProps": "",
+            "correl": "",
+            "expiry": "",
+            "broker": "0d4cf1425404ae49",
+            "x": 100,
+            "y": 100,
+            "wires": []
+        },
+        {
+            "id": "c8163cb6d14d4505",
+            "type": "inject",
+            "z": "5b9b7ee8f004a96",
+            "name": "",
+            "props": [
+                {
+                    "p": "payload"
+                },
+                {
+                    "p": "topic",
+                    "vt": "str"
+                }
+            ],
+            "repeat": "5",
+            "crontab": "",
+            "once": false,
+            "onceDelay": 0.1,
+            "topic": "time",
+            "payload": "",
+            "payloadType": "date",
+            "x": 300,
+            "y": 560,
+            "wires": [
+                [
+                    "e8470fd2bebc4e55"
+                ]
+            ]
+        },
+        {
+            "id": "e8470fd2bebc4e55",
+            "type": "function",
+            "z": "5b9b7ee8f004a96",
+            "name": "Timer switch",
+            "func": "let unix_timestamp = msg.payload;\n\nlet old_state = flow.get(\"switch_state\")\n\nlet set_hour_min = 12;\nlet set_minute_min = 15;\n\nlet set_hour_max = 13;\nlet set_minute_max = 15;\n\n\nlet date = new Date(unix_timestamp);\n\nlet current_hour = date.getHours();\nlet current_minute = date.getMinutes();\n\n\nvar newMsg = null;\n\nif (current_hour >= set_hour_min && current_hour <= set_hour_max && current_minute >= set_minute_min && current_minute <= set_minute_max) {\n    if (old_state == \"OFF\")\n        newMsg = { payload: \"{\\\"state\\\": \\\"ON\\\"}\"}\n}\nelse {\n    if (old_state == \"ON\")\n        newMsg = { payload: \"{\\\"state\\\": \\\"OFF\\\"}\" }\n}\n\n\nreturn newMsg;\n",
+            "outputs": 1,
+            "timeout": 0,
+            "noerr": 0,
+            "initialize": "",
+            "finalize": "",
+            "libs": [],
+            "x": 570,
+            "y": 560,
+            "wires": [
+                [
+                    "e0014c01f8d94af1"
+                ]
+            ]
+        },
+        {
+            "id": "4302a9f7f84d47eb",
+            "type": "function",
+            "z": "5b9b7ee8f004a96",
+            "name": "state filter",
+            "func": "\nvar newMsg = { payload: msg.payload.state};\n\nnewMsg.topic = \"state\"\n\nreturn newMsg;",
+            "outputs": 1,
+            "timeout": 0,
+            "noerr": 0,
+            "initialize": "",
+            "finalize": "",
+            "libs": [],
+            "x": 560,
+            "y": 380,
+            "wires": [
+                [
+                    "5585bdbe74ed493a"
+                ]
+            ]
+        },
+        {
+            "id": "5585bdbe74ed493a",
+            "type": "change",
+            "z": "5b9b7ee8f004a96",
+            "name": "",
+            "rules": [
+                {
+                    "t": "set",
+                    "p": "switch_state",
+                    "pt": "flow",
+                    "to": "payload",
+                    "tot": "msg"
+                }
+            ],
+            "action": "",
+            "property": "",
+            "from": "",
+            "to": "",
+            "reg": false,
+            "x": 840,
+            "y": 380,
+            "wires": [
+                []
+            ]
+        }
+    ],
+    "configs": []
+}

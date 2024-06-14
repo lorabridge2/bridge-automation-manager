@@ -16,4 +16,4 @@ DEVICE_CLASSES = (
     'programming_operation_mode', 'smoke', 'soil_moisture', 'sos', 'sound_volume', 'switch', 'switch_type',
     'switch_type_2', 'tamper', 'temperature', 'test', 'valve_position', 'valve_switch', 'valve_state',
     'valve_detection', 'vibration', 'voc', 'voltage', 'voltage_phase_b', 'voltage_phase_c', 'water_leak', 'warning',
-    'week', 'window_detection', 'moving', 'x_axis', 'y_axis', 'z_axis', 'pincode', 'squawk')
+    'week', 'window_detection', 'moving', 'x_axis', 'y_axis', 'z_axis', 'pincode', 'squawk','state')

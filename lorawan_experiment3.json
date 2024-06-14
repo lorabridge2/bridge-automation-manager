@@ -1,0 +1,176 @@
+{
+    "id": "dad002d6de634c55",
+    "type": "tab",
+    "label": "lorabridge flow",
+    "disabled": true,
+    "info": "True heros drink matcha.",
+    "env": [],
+    "nodes": [
+        {
+            "id": "2c018beff04b435e",
+            "type": "mqtt in",
+            "z": "dad002d6de634c55",
+            "name": "",
+            "topic": "zigbee2mqtt/0x54ef4410004dc531",
+            "qos": "2",
+            "datatype": "auto-detect",
+            "broker": "0d4cf1425404ae49",
+            "nl": false,
+            "rap": true,
+            "rh": 0,
+            "inputs": 0,
+            "x": 340,
+            "y": 100,
+            "wires": [
+                [
+                    "1067f9c7f9294aa9"
+                ]
+            ]
+        },
+        {
+            "id": "a33b6755d5b6425e",
+            "type": "mqtt in",
+            "z": "dad002d6de634c55",
+            "name": "",
+            "topic": "zigbee2mqtt/0x00158d0002310451",
+            "qos": "2",
+            "datatype": "auto-detect",
+            "broker": "0d4cf1425404ae49",
+            "nl": false,
+            "rap": true,
+            "rh": 0,
+            "inputs": 0,
+            "x": 340,
+            "y": 100,
+            "wires": [
+                [
+                    "a950221fbb564a75"
+                ]
+            ]
+        },
+        {
+            "id": "1a208ff3c2e84219",
+            "type": "mqtt out",
+            "z": "dad002d6de634c55",
+            "name": "lb2_mqtt_out",
+            "topic": "zigbee2mqtt/0x54ef4410004dc531/set",
+            "qos": "",
+            "retain": "",
+            "respTopic": "",
+            "contentType": "",
+            "userProps": "",
+            "correl": "",
+            "expiry": "",
+            "broker": "0d4cf1425404ae49",
+            "x": 100,
+            "y": 100,
+            "wires": []
+        },
+        {
+            "id": "1067f9c7f9294aa9",
+            "type": "function",
+            "z": "dad002d6de634c55",
+            "name": "state filter",
+            "func": "\nvar newMsg = { payload: msg.payload.state};\n\nnewMsg.topic = \"state\"\n\nreturn newMsg;",
+            "outputs": 1,
+            "timeout": 0,
+            "noerr": 0,
+            "initialize": "",
+            "finalize": "",
+            "libs": [],
+            "x": 460,
+            "y": 280,
+            "wires": [
+                [
+                    "e9e77397ddc345f6"
+                ]
+            ]
+        },
+        {
+            "id": "e9e77397ddc345f6",
+            "type": "change",
+            "z": "dad002d6de634c55",
+            "name": "",
+            "rules": [
+                {
+                    "t": "set",
+                    "p": "switch_state",
+                    "pt": "flow",
+                    "to": "payload",
+                    "tot": "msg"
+                }
+            ],
+            "action": "",
+            "property": "",
+            "from": "",
+            "to": "",
+            "reg": false,
+            "x": 760,
+            "y": 280,
+            "wires": [
+                []
+            ]
+        },
+        {
+            "id": "b4aaf4735488449b",
+            "type": "function",
+            "z": "dad002d6de634c55",
+            "name": "binary state transition",
+            "func": "let old_state = flow.get(\"switch_state\");\nlet new_state = msg.payload;\n\nvar newMsg = null;\n\nif (old_state == \"OFF\" && new_state == \"ON\") {\n    newMsg = { payload: \"{\\\"state\\\": \\\"ON\\\"}\" };\n}\n\nif (old_state == \"ON\" && new_state == \"OFF\") {\n    newMsg = { payload: \"{\\\"state\\\": \\\"OFF\\\"}\" };\n}\n\nreturn newMsg;",
+            "outputs": 1,
+            "timeout": 0,
+            "noerr": 0,
+            "initialize": "",
+            "finalize": "",
+            "libs": [],
+            "x": 980,
+            "y": 360,
+            "wires": [
+                [
+                    "1a208ff3c2e84219"
+                ]
+            ]
+        },
+        {
+            "id": "a950221fbb564a75",
+            "type": "function",
+            "z": "dad002d6de634c55",
+            "name": "convert to numeric",
+            "func": "var newMsg = { payload: parseFloat(msg.payload.temperature)};\n\nnewMsg.topic = \"numeric_value\"\n\nreturn newMsg;\n",
+            "outputs": 1,
+            "timeout": 0,
+            "noerr": 0,
+            "initialize": "",
+            "finalize": "",
+            "libs": [],
+            "x": 490,
+            "y": 360,
+            "wires": [
+                [
+                    "622abdd070ff4d86"
+                ]
+            ]
+        },
+        {
+            "id": "622abdd070ff4d86",
+            "type": "function",
+            "z": "dad002d6de634c55",
+            "name": "hystersis",
+            "func": "let previous_value = flow.get(\"previous_value\");\nlet initialized = flow.get(\"initialized\");\n\nvar low_threshold = 21.5;\nvar high_threshold = 23.700000762939453;\n\nvar current_value = msg.payload;\n\nvar newMsg = null;\n\nif(initialized == false) {\n    if (msg.payload < low_threshold)\n        newMsg = {payload: \"ON\"};\n    initialized = true;\n}\n\nif(previous_value >= low_threshold && current_value < low_threshold) {\n    newMsg = {payload: \"ON\"};\n}\n\nif(previous_value <= high_threshold && current_value > high_threshold) {\n    newMsg = {payload: \"OFF\"};\n}\n\nreturn newMsg;",
+            "outputs": 1,
+            "timeout": 0,
+            "noerr": 0,
+            "initialize": "// Der Code hier wird ausgef\u00c3\u00bchrt,\n// wenn der Node gestartet wird\nflow.set(\"previous_value\", 0.0);\nflow.set(\"initialized\", false);",
+            "finalize": "",
+            "libs": [],
+            "x": 720,
+            "y": 360,
+            "wires": [
+                [
+                    "b4aaf4735488449b"
+                ]
+            ]
+        }
+    ],
+    "configs": []
+}
