@@ -4,7 +4,7 @@
         "id": "notgenerated",
         "type": "lb_countdown_switch",
         "inputs": ["a844f495c824780c", "4d538f6d3957ef69"],
-        "outputs": ["dcc55baf0f0a74e9"],
+        "outputs": ["a844f495c824780c"],
         "parameters": [        
                 {
                     "nametag": "lb_countdown_value",

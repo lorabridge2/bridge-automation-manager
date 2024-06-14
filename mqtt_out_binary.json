@@ -51,7 +51,7 @@
         "type": "function",
         "z": "",
         "name": "output state generation",
-        "func": "var newMsg;\n\n if(msg.payload == true) {\n    newMsg = { payload: \"{lb_device_attribute: lb_boolean_true}\" };\n}\nelse {\n    newMsg = { payload: \"{lb_device_attribute: lb_boolean_false}\" };\n}\n\nreturn newMsg;",
+        "func": "var newMsg;\n\n if(msg.payload == true) {\n    newMsg = { payload: \"{\\\"lb_device_attribute\\\": lb_boolean_true}\" };\n}\nelse {\n    newMsg = { payload: \"{\\\"lb_device_attribute\\\": lb_boolean_false}\" };\n}\n\nreturn newMsg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
