@@ -60,7 +60,7 @@ class node_bytes(IntEnum):
 
 node_template_files_dictionary = {
     node_bytes.COUNTDOWN_SWITCH.value: "countdown_switch_new.json",
-    node_bytes.TIMER_SWITCH.value: "timer_switch.json",
+    node_bytes.TIMER_SWITCH.value: "timer_switch_new.json",
     node_bytes.BINARY_DEVICE.value: "mqtt_out_binary.json",
     node_bytes.BINARY_SENSOR.value: "mqtt_in_binary.json",
 }

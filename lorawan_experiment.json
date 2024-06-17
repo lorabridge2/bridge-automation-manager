@@ -1,5 +1,5 @@
 {
-    "id": "d5df8c9308654221",
+    "id": "c8c094f0c6584ace",
     "type": "tab",
     "label": "lorabridge flow",
     "disabled": true,
@@ -7,9 +7,9 @@
     "env": [],
     "nodes": [
         {
-            "id": "26fa6460a5c24187",
+            "id": "7e3d580098b94918",
             "type": "mqtt in",
-            "z": "d5df8c9308654221",
+            "z": "c8c094f0c6584ace",
             "name": "",
             "topic": "zigbee2mqtt/0x54ef4410004dc531",
             "qos": "2",
@@ -23,14 +23,14 @@
             "y": 380,
             "wires": [
                 [
-                    "b941c1f4f9ad459a"
+                    "bf47605f4bcd4dae"
                 ]
             ]
         },
         {
-            "id": "b941c1f4f9ad459a",
+            "id": "bf47605f4bcd4dae",
             "type": "function",
-            "z": "d5df8c9308654221",
+            "z": "c8c094f0c6584ace",
             "name": " input state filter",
             "func": "\nvar newMsg;\n\n if(msg.payload.state == \"ON\") {\n    newMsg = { payload: true};\n}\nelse if(msg.payload.state == \"OFF\") {\n    newMsg = { payload: false};\n}\n\nnewMsg.topic = \"binary_state\"\n\nreturn newMsg;",
             "outputs": 1,
@@ -43,57 +43,15 @@
             "y": 380,
             "wires": [
                 [
-                    "a98f7c7a07c04471"
+                    "c5c5bb03553c4eaf"
                 ]
             ],
             "topic": "zigbee2mqtt/0x54ef4410004dc531"
         },
         {
-            "id": "1d73556a8c6b4410",
-            "type": "mqtt in",
-            "z": "d5df8c9308654221",
-            "name": "",
-            "topic": "zigbee2mqtt/0x00158d0007e3feb9",
-            "qos": "2",
-            "datatype": "auto-detect",
-            "broker": "0d4cf1425404ae49",
-            "nl": false,
-            "rap": true,
-            "rh": 0,
-            "inputs": 0,
-            "x": 520,
-            "y": 380,
-            "wires": [
-                [
-                    "bd19deec54e44dea"
-                ]
-            ]
-        },
-        {
-            "id": "bd19deec54e44dea",
-            "type": "function",
-            "z": "d5df8c9308654221",
-            "name": " input state filter",
-            "func": "\nvar newMsg;\n\n if(msg.payload.occupancy == true) {\n    newMsg = { payload: true};\n}\nelse if(msg.payload.occupancy == false) {\n    newMsg = { payload: false};\n}\n\nnewMsg.topic = \"binary_state\"\n\nreturn newMsg;",
-            "outputs": 1,
-            "timeout": 0,
-            "noerr": 0,
-            "initialize": "",
-            "finalize": "",
-            "libs": [],
-            "x": 820,
-            "y": 380,
-            "wires": [
-                [
-                    "81dced331a1d4ba1"
-                ]
-            ],
-            "topic": "zigbee2mqtt/0x00158d0007e3feb9"
-        },
-        {
-            "id": "608a089a10a64d75",
+            "id": "e07768c59a8a4156",
             "type": "mqtt out",
-            "z": "d5df8c9308654221",
+            "z": "c8c094f0c6584ace",
             "name": "",
             "topic": "zigbee2mqtt/0x54ef4410004dc531/set",
             "qos": "",
@@ -109,9 +67,9 @@
             "wires": []
         },
         {
-            "id": "7516a16752634e2e",
+            "id": "50707b70dee4861",
             "type": "function",
-            "z": "d5df8c9308654221",
+            "z": "c8c094f0c6584ace",
             "name": "output state generation",
             "func": "var newMsg;\n\n if(msg.payload == true) {\n    newMsg = { payload: \"{\\\"state\\\": \\\"ON\\\"}\" };\n}\nelse {\n    newMsg = { payload: \"{\\\"state\\\": \\\"OFF\\\"}\" };\n}\n\nreturn newMsg;",
             "outputs": 1,
@@ -124,16 +82,16 @@
             "y": 320,
             "wires": [
                 [
-                    "608a089a10a64d75"
+                    "e07768c59a8a4156"
                 ]
             ],
             "topic": "zigbee2mqtt/0x54ef4410004dc531/set"
         },
         {
-            "id": "e549889f86cd460c",
+            "id": "cc3001f0c13c41e7",
             "type": "inject",
-            "z": "d5df8c9308654221",
-            "name": "timestamp every 1 second",
+            "z": "c8c094f0c6584ace",
+            "name": "",
             "props": [
                 {
                     "p": "payload"
@@ -143,45 +101,45 @@
                     "vt": "str"
                 }
             ],
-            "repeat": "1",
+            "repeat": "5",
             "crontab": "",
-            "once": true,
+            "once": false,
             "onceDelay": 0.1,
-            "topic": "trigger",
+            "topic": "time",
             "payload": "",
             "payloadType": "date",
-            "x": 380,
-            "y": 360,
+            "x": 400,
+            "y": 420,
             "wires": [
                 [
-                    "81dced331a1d4ba1"
+                    "f2033c74a7bb4484"
                 ]
             ]
         },
         {
-            "id": "81dced331a1d4ba1",
+            "id": "f2033c74a7bb4484",
             "type": "function",
-            "z": "d5df8c9308654221",
-            "name": "countdown switch",
-            "func": "\nlet counter = context.get(\"count\")\nvar newMsg = null;\n\n\n\nswitch(msg.topic) {\n\n    case \"binary_state\":\n             \n        if(msg.payload == true) {\n            \n            counter = 5;\n            context.set(\"count\", counter);\n        }\n        break;\n    case \"trigger\":\n        \n        break;\n    default:\n        return newMsg;        \n}\n\nif(counter == 0) {\n    newMsg = { payload: false };\n}\nelse {    \n    counter--;\n    context.set(\"count\",counter)\n    newMsg = { payload: true };\n}\n\n\n\nreturn newMsg;",
+            "z": "c8c094f0c6584ace",
+            "name": "Timer switch",
+            "func": "let unix_timestamp = msg.payload;\n\nlet set_hour_min = 9;\nlet set_minute_min = 15;\n\nlet set_hour_max = 10;\nlet set_minute_max = 15;\n\n\nlet date = new Date(unix_timestamp);\n\nlet current_hour = date.getHours();\nlet current_minute = date.getMinutes();\n\nlet current_in_minutes = current_hour*60 + current_minute;\nlet max_in_minutes = set_hour_max*60 + set_minute_max;\nlet min_in_minutes = set_hour_min*60 + set_minute_max;\n\nvar newMsg = null;\n\nif (current_in_minutes >= min_in_minutes && current_in_minutes <= max_in_minutes) {\n    \n    newMsg = { payload: true};\n}\nelse {\n    \n    newMsg = { payload: false };\n}\n\n\nreturn newMsg;\n\n",
             "outputs": 1,
             "timeout": 0,
-            "noerr": 0,
-            "initialize": "// Der Code hier wird ausgef\u00c3\u00bchrt,\n// wenn der Node gestartet wird\n\ncontext.set(\"count\", 0);",
+            "noerr": 4,
+            "initialize": "",
             "finalize": "",
             "libs": [],
-            "x": 750,
-            "y": 360,
+            "x": 670,
+            "y": 420,
             "wires": [
                 [
-                    "a98f7c7a07c04471"
+                    "c5c5bb03553c4eaf"
                 ]
             ]
         },
         {
-            "id": "a98f7c7a07c04471",
+            "id": "c5c5bb03553c4eaf",
             "type": "function",
-            "z": "d5df8c9308654221",
+            "z": "c8c094f0c6584ace",
             "name": "binary state transition",
             "func": "if (msg.topic == \"binary_state\") {\n    context.set(\"binary_state\", msg.payload);\n    return;\n}\n\nlet old_state = context.get(\"binary_state\");\nlet new_state = msg.payload;\n\nvar newMsg = null;\n\nif (old_state == false && new_state == true) {\n    newMsg = { payload: true };\n}\n\nif (old_state == true && new_state == false) {\n    newMsg = { payload: false };\n}\n\n\nreturn newMsg;",
             "outputs": 1,
@@ -190,11 +148,11 @@
             "initialize": "",
             "finalize": "",
             "libs": [],
-            "x": 1020,
-            "y": 360,
+            "x": 960,
+            "y": 420,
             "wires": [
                 [
-                    "7516a16752634e2e"
+                    "50707b70dee4861"
                 ]
             ]
         }
