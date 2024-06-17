@@ -54,7 +54,7 @@ class node_bytes(IntEnum):
     LOGIC_AND = 6
     LOGIC_OR = 7
     TIMER_SWITCH = 8
-    THERMOSTAT = 9
+    HYSTERESIS = 9
     COUNTDOWN_SWITCH = 10
 
 
@@ -63,6 +63,8 @@ node_template_files_dictionary = {
     node_bytes.TIMER_SWITCH.value: "timer_switch_new.json",
     node_bytes.BINARY_DEVICE.value: "mqtt_out_binary.json",
     node_bytes.BINARY_SENSOR.value: "mqtt_in_binary.json",
+    node_bytes.NUMERIC_SENSOR.value: "mqtt_in_numeric.json",
+    node_bytes.HYSTERESIS: "hysteresis.json"
 }
 
 # Same as above

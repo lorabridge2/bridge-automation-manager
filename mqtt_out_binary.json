@@ -9,6 +9,12 @@
         "outputs": [],
         "parameters": [        
             {
+                "nametag": "lb_device_attribute",
+                "current_value": "state",
+                "node_id": "0e617a38c5a5b2b3",
+                "nodekey": "func"
+            },
+            {
                 "nametag": "lb_boolean_true",
                 "current_value": true,
                 "node_id": "0e617a38c5a5b2b3",
@@ -19,13 +25,8 @@
                 "current_value": false,
                 "node_id": "0e617a38c5a5b2b3",
                 "nodekey": "func"
-            },
-            {
-                "nametag": "lb_device_attribute",
-                "current_value": "state",
-                "node_id": "0e617a38c5a5b2b3",
-                "nodekey": "func"
             }
+            
         ]
     },
     {

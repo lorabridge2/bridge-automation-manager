@@ -1,0 +1,66 @@
+[
+    {
+        "description": "A simple hysteresis",
+        "id": "notgenerated",
+        "type": "lb_hysteresis",        
+        "inputs": ["055bfbfe0c762872", "6193f0059e8908ba"],
+        "outputs": ["055bfbfe0c762872"],
+        "input_descriptions": ["binary devices state", "sensor input"],
+        "output_descriptions": ["controller state"],        
+        "parameters": [        
+                {
+                    "nametag": "lb_hysteresis_low",
+                    "current_value": 21.0,
+                    "node_id": "6193f0059e8908ba",
+                    "nodekey": "func"
+                },
+                {
+                    "nametag": "lb_hysteresis_high",
+                    "current_value": 25.0,
+                    "node_id": "6193f0059e8908ba",
+                    "nodekey": "func"
+                }
+                                   
+        ]
+    },
+    {
+        "id": "055bfbfe0c762872",
+        "type": "function",
+        "z": "785fe3e2ae7c473b",
+        "name": "binary state transition",
+        "func": "if (msg.topic == \"binary_state\") {\n    context.set(\"binary_state\", msg.payload);\n    return;\n}\n\nlet old_state = context.get(\"binary_state\");\nlet new_state = msg.payload;\n\nvar newMsg = null;\n\nif (old_state == false && new_state == true) {\n    newMsg = { payload: true };\n}\n\nif (old_state == true && new_state == false) {\n    newMsg = { payload: false };\n}\n\n\nreturn newMsg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 820,
+        "y": 420,
+        "wires": [
+            [
+                "notset"
+            ]
+        ]
+    },
+    {
+        "id": "6193f0059e8908ba",
+        "type": "function",
+        "z": "785fe3e2ae7c473b",
+        "name": "hysteresis",
+        "func": "let previous_value = context.get(\"previous_value\");\nlet initialized = context.get(\"initialized\");\n\nvar low_threshold = lb_hysteresis_low;\nvar high_threshold = lb_hysteresis_high;\n\nvar current_value = msg.payload;\n\nvar newMsg = null;\n\nif(initialized == false) {\n    if (msg.payload < low_threshold)\n        newMsg = {payload: true};\n    initialized = true;\n}\n\nif(previous_value >= low_threshold && current_value < low_threshold) {\n    newMsg = {payload: true};\n}\n\nif(previous_value <= high_threshold && current_value > high_threshold) {\n    newMsg = {payload: false};\n}\n\nreturn newMsg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "// Der Code hier wird ausgefÃ¼hrt,\n// wenn der Node gestartet wird\ncontext.set(\"previous_value\", 0.0);\ncontext.set(\"initialized\", false);",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 420,
+        "wires": [
+            [
+                "055bfbfe0c762872"
+            ]
+        ]
+    }
+]

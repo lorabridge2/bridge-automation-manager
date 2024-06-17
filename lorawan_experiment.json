@@ -1,5 +1,5 @@
 {
-    "id": "c8c094f0c6584ace",
+    "id": "b2c8d6dcbee04821",
     "type": "tab",
     "label": "lorabridge flow",
     "disabled": true,
@@ -7,9 +7,9 @@
     "env": [],
     "nodes": [
         {
-            "id": "7e3d580098b94918",
+            "id": "75718971ae746df",
             "type": "mqtt in",
-            "z": "c8c094f0c6584ace",
+            "z": "b2c8d6dcbee04821",
             "name": "",
             "topic": "zigbee2mqtt/0x54ef4410004dc531",
             "qos": "2",
@@ -23,14 +23,14 @@
             "y": 380,
             "wires": [
                 [
-                    "bf47605f4bcd4dae"
+                    "f05fc850b0284af4"
                 ]
             ]
         },
         {
-            "id": "bf47605f4bcd4dae",
+            "id": "f05fc850b0284af4",
             "type": "function",
-            "z": "c8c094f0c6584ace",
+            "z": "b2c8d6dcbee04821",
             "name": " input state filter",
             "func": "\nvar newMsg;\n\n if(msg.payload.state == \"ON\") {\n    newMsg = { payload: true};\n}\nelse if(msg.payload.state == \"OFF\") {\n    newMsg = { payload: false};\n}\n\nnewMsg.topic = \"binary_state\"\n\nreturn newMsg;",
             "outputs": 1,
@@ -43,15 +43,56 @@
             "y": 380,
             "wires": [
                 [
-                    "c5c5bb03553c4eaf"
+                    "a82a034ec15a4d30"
                 ]
             ],
             "topic": "zigbee2mqtt/0x54ef4410004dc531"
         },
         {
-            "id": "e07768c59a8a4156",
+            "id": "8c8657ecf6aa439b",
+            "type": "mqtt in",
+            "z": "b2c8d6dcbee04821",
+            "name": "",
+            "topic": "zigbee2mqtt/0x00158d0002310451",
+            "qos": "2",
+            "datatype": "auto-detect",
+            "broker": "0d4cf1425404ae49",
+            "nl": false,
+            "rap": true,
+            "rh": 0,
+            "inputs": 0,
+            "x": 520,
+            "y": 380,
+            "wires": [
+                [
+                    "81b5d0f2d5a2410d"
+                ]
+            ]
+        },
+        {
+            "id": "81b5d0f2d5a2410d",
+            "type": "function",
+            "z": "b2c8d6dcbee04821",
+            "name": " input value filter",
+            "func": "var newMsg = { payload: parseFloat(msg.payload.temperature)};\n\nnewMsg.topic = \"numeric_value\"\n\nreturn newMsg;\n",
+            "outputs": 1,
+            "timeout": 0,
+            "noerr": 0,
+            "initialize": "",
+            "finalize": "",
+            "libs": [],
+            "x": 820,
+            "y": 380,
+            "wires": [
+                [
+                    "e8e7843bf55545a6"
+                ]
+            ]
+        },
+        {
+            "id": "6903352a7e6470c",
             "type": "mqtt out",
-            "z": "c8c094f0c6584ace",
+            "z": "b2c8d6dcbee04821",
             "name": "",
             "topic": "zigbee2mqtt/0x54ef4410004dc531/set",
             "qos": "",
@@ -67,9 +108,9 @@
             "wires": []
         },
         {
-            "id": "50707b70dee4861",
+            "id": "fb1c86b1a4ed435d",
             "type": "function",
-            "z": "c8c094f0c6584ace",
+            "z": "b2c8d6dcbee04821",
             "name": "output state generation",
             "func": "var newMsg;\n\n if(msg.payload == true) {\n    newMsg = { payload: \"{\\\"state\\\": \\\"ON\\\"}\" };\n}\nelse {\n    newMsg = { payload: \"{\\\"state\\\": \\\"OFF\\\"}\" };\n}\n\nreturn newMsg;",
             "outputs": 1,
@@ -82,64 +123,15 @@
             "y": 320,
             "wires": [
                 [
-                    "e07768c59a8a4156"
+                    "6903352a7e6470c"
                 ]
             ],
             "topic": "zigbee2mqtt/0x54ef4410004dc531/set"
         },
         {
-            "id": "cc3001f0c13c41e7",
-            "type": "inject",
-            "z": "c8c094f0c6584ace",
-            "name": "",
-            "props": [
-                {
-                    "p": "payload"
-                },
-                {
-                    "p": "topic",
-                    "vt": "str"
-                }
-            ],
-            "repeat": "5",
-            "crontab": "",
-            "once": false,
-            "onceDelay": 0.1,
-            "topic": "time",
-            "payload": "",
-            "payloadType": "date",
-            "x": 400,
-            "y": 420,
-            "wires": [
-                [
-                    "f2033c74a7bb4484"
-                ]
-            ]
-        },
-        {
-            "id": "f2033c74a7bb4484",
+            "id": "a82a034ec15a4d30",
             "type": "function",
-            "z": "c8c094f0c6584ace",
-            "name": "Timer switch",
-            "func": "let unix_timestamp = msg.payload;\n\nlet set_hour_min = 9;\nlet set_minute_min = 15;\n\nlet set_hour_max = 10;\nlet set_minute_max = 15;\n\n\nlet date = new Date(unix_timestamp);\n\nlet current_hour = date.getHours();\nlet current_minute = date.getMinutes();\n\nlet current_in_minutes = current_hour*60 + current_minute;\nlet max_in_minutes = set_hour_max*60 + set_minute_max;\nlet min_in_minutes = set_hour_min*60 + set_minute_max;\n\nvar newMsg = null;\n\nif (current_in_minutes >= min_in_minutes && current_in_minutes <= max_in_minutes) {\n    \n    newMsg = { payload: true};\n}\nelse {\n    \n    newMsg = { payload: false };\n}\n\n\nreturn newMsg;\n\n",
-            "outputs": 1,
-            "timeout": 0,
-            "noerr": 4,
-            "initialize": "",
-            "finalize": "",
-            "libs": [],
-            "x": 670,
-            "y": 420,
-            "wires": [
-                [
-                    "c5c5bb03553c4eaf"
-                ]
-            ]
-        },
-        {
-            "id": "c5c5bb03553c4eaf",
-            "type": "function",
-            "z": "c8c094f0c6584ace",
+            "z": "b2c8d6dcbee04821",
             "name": "binary state transition",
             "func": "if (msg.topic == \"binary_state\") {\n    context.set(\"binary_state\", msg.payload);\n    return;\n}\n\nlet old_state = context.get(\"binary_state\");\nlet new_state = msg.payload;\n\nvar newMsg = null;\n\nif (old_state == false && new_state == true) {\n    newMsg = { payload: true };\n}\n\nif (old_state == true && new_state == false) {\n    newMsg = { payload: false };\n}\n\n\nreturn newMsg;",
             "outputs": 1,
@@ -148,11 +140,31 @@
             "initialize": "",
             "finalize": "",
             "libs": [],
-            "x": 960,
+            "x": 820,
             "y": 420,
             "wires": [
                 [
-                    "50707b70dee4861"
+                    "fb1c86b1a4ed435d"
+                ]
+            ]
+        },
+        {
+            "id": "e8e7843bf55545a6",
+            "type": "function",
+            "z": "b2c8d6dcbee04821",
+            "name": "hysteresis",
+            "func": "let previous_value = context.get(\"previous_value\");\nlet initialized = context.get(\"initialized\");\n\nvar low_threshold = 21.5;\nvar high_threshold = 23.700000762939453;\n\nvar current_value = msg.payload;\n\nvar newMsg = null;\n\nif(initialized == false) {\n    if (msg.payload < low_threshold)\n        newMsg = {payload: true};\n    initialized = true;\n}\n\nif(previous_value >= low_threshold && current_value < low_threshold) {\n    newMsg = {payload: true};\n}\n\nif(previous_value <= high_threshold && current_value > high_threshold) {\n    newMsg = {payload: false};\n}\n\nreturn newMsg;",
+            "outputs": 1,
+            "timeout": 0,
+            "noerr": 0,
+            "initialize": "// Der Code hier wird ausgef\u00c3\u0192\u00c2\u00bchrt,\n// wenn der Node gestartet wird\ncontext.set(\"previous_value\", 0.0);\ncontext.set(\"initialized\", false);",
+            "finalize": "",
+            "libs": [],
+            "x": 560,
+            "y": 420,
+            "wires": [
+                [
+                    "a82a034ec15a4d30"
                 ]
             ]
         }
