@@ -109,7 +109,7 @@ def compose_nodered_flow_to_json(flow: LBflow, output_file: str) -> None:
                     node.nodered_template[0]["parameters"][2]["current_value"] = "\"" + str(boolean_attributes["value_off"]).lower() + "\""
 
 
-            # TODO: mqtt output topic should actually be defined in the template and not hardcoded here.
+            
 
             if (
                 template_nodes["type"] == "mqtt out"

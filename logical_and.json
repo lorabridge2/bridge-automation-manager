@@ -1,0 +1,73 @@
+[
+    {
+        "description": "Logical AND, which retains the input states",
+        "id": "notgenerated",
+        "type": "lb_logic_node",        
+        "inputs": ["e73b481f189a7c99", "01d1eb3fd78c2c3f"],
+        "outputs": ["f07192701357135e"],
+        "input_descriptions": ["input1","input2"],
+        "output_descriptions": ["logic AND"],        
+        "parameters": [                                          
+        ]
+    },   
+    {
+        "id": "f07192701357135e",
+        "type": "function",
+        "z": "39adb36f2a99f649",
+        "name": "logical AND",
+        "func": "if (msg.topic == \"input1\") {\n    context.set(\"input1\", msg.payload);\n}\n\nif (msg.topic == \"input2\") {\n    context.set(\"input2\", msg.payload);\n}\n\nlet input1 = context.get(\"input1\");\nlet input2 = context.get(\"input2\");\n\nlet newMsg = null;\n\n\nif (input1 == true && input2 == true) {\n    newMsg = { payload: true };\n}\nelse {\n    newMsg = { payload: false };\n}\n\n\nreturn newMsg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 750,
+        "y": 340,
+        "wires": [
+            [
+                "notset"
+            ]
+        ]
+    },
+    {
+        "id": "e73b481f189a7c99",
+        "type": "function",
+        "z": "39adb36f2a99f649",
+        "name": "input2",
+        "func": "var newMsg = { payload: msg.payload};\n\nnewMsg.topic = \"input2\"\n\nreturn newMsg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 550,
+        "y": 380,
+        "wires": [
+            [
+                "f07192701357135e"
+            ]
+        ]
+    },
+    {
+        "id": "01d1eb3fd78c2c3f",
+        "type": "function",
+        "z": "39adb36f2a99f649",
+        "name": "input1",
+        "func": "\nvar newMsg = { payload: msg.payload};\n\nnewMsg.topic = \"input1\"\n\nreturn newMsg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 550,
+        "y": 300,
+        "wires": [
+            [
+                "f07192701357135e"
+            ]
+        ]
+    }
+]

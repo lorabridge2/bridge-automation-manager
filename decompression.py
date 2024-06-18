@@ -64,7 +64,9 @@ node_template_files_dictionary = {
     node_bytes.BINARY_DEVICE.value: "mqtt_out_binary.json",
     node_bytes.BINARY_SENSOR.value: "mqtt_in_binary.json",
     node_bytes.NUMERIC_SENSOR.value: "mqtt_in_numeric.json",
-    node_bytes.HYSTERESIS: "hysteresis.json"
+    node_bytes.HYSTERESIS: "hysteresis.json",
+    node_bytes.LOGIC_AND: "logical_and.json",
+    node_bytes.LOGIC_OR: "logical_or.json"
 }
 
 # Same as above
