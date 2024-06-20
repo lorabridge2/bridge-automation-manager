@@ -154,12 +154,56 @@ def compose_nodered_flow_to_json(flow: LBflow, output_file: str) -> None:
                                     parameter_nodekey
                                 ].replace(parameter_tag, str(parameter_value))
 
+    flow.nodered_flow_dict = nodered_flow[0]
+
     nodered_flow_json = json.dumps(nodered_flow[0], indent=4)
 
     with open(output_file, "w") as json_file:
         json_file.write(nodered_flow_json)
 
-def upload_flow_to_nodered(input_file):
+def delete_flow_from_nodered(flow : LBflow):
+
+    headers = {'Content-Type':'application/json'}
+    url = "http://" + NODERED_HOST + ":1880/flow" + "/"+str(flow.nodered_id)
+    selected_method = "DELETE"
+
+    req = request.Request(url, b'', headers, origin_req_host=None, unverifiable=False, method=selected_method)
+    resp = request.urlopen(req)
+
+    print("Flow deletion result:", resp.read())
+
+
+def upload_flow_to_nodered(flow : LBflow, update : bool):
+    headers = {'Content-Type':'application/json'}
+    url = "http://" + NODERED_HOST + ":1880/flow"
+    selected_method = "POST"
+
+    if update:
+        selected_method = "PUT"
+        url += "/"+str(flow.nodered_id)
+
+    nr_flow = json.dumps(flow.nodered_flow_dict)
+
+    nr_flow_bin = nr_flow if type(nr_flow) == bytes else nr_flow.encode('utf-8')
+    req = request.Request(url, nr_flow_bin, headers, origin_req_host=None, unverifiable=False, method=selected_method)
+    resp = request.urlopen(req)
+
+    flow_resp_raw = resp.read()
+    
+    flow_resp = json.loads(flow_resp_raw)
+
+    flow_id = ''
+
+    if 'id' not in flow_resp:
+        print("Flow upload to Nodered failed.")
+        # TODO: Inform user 
+    else:            
+        flow_id = flow_resp['id']
+
+    return flow_id
+
+
+def upload_flow_to_nodered_from_file(input_file):
     headers = {'Content-Type':'application/json'}
     url = "http://" + NODERED_HOST + ":1880/flow"
 

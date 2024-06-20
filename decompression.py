@@ -36,6 +36,7 @@ class action_bytes(IntEnum):
     TIME_SYNC_RESPONSE = 8
     ADD_FLOW = 9
     FLOW_COMPLETE = 10
+    REMOVE_FLOW = 11
 
 
 class parameter_data_types(IntEnum):
@@ -77,7 +78,10 @@ node_template_files_dictionary = {
 
 command_byte_structures = {
     "add_flow": {"action_byte": 0, "flow_id": 1},
+    "enable_flow": {"action_byte": 0, "flow_id": 1},
+    "disable_flow": {"action_byte": 0, "flow_id": 1},
     "flow_complete": {"action_byte": 0, "flow_id": 1},
+    "remove_flow": {"action_byte": 0, "flow_id": 1},
     "add_node": {"action_byte": 0, "flow_id": 1, "node_id": 2, "node_type": 3},
     "add_device": {
         "action_byte": 0,
@@ -115,6 +119,10 @@ def add_flow(flow_id) -> int:
 
     return error_messages.NO_ERRORS
 
+
+def delete_flow(flow_id) -> int:
+
+    flows.remove(seek_flow(flow_id))
 
 # TODO: might be better to provide flows as parameter
 
@@ -307,6 +315,45 @@ def parse_compressed_command(command) -> int:
             flow_id = command[command_byte_structures["add_flow"]["flow_id"]]
             add_flow(flow_id)
 
+        case action_bytes.ENABLE_FLOW:
+
+            if len(command) is not len(command_byte_structures["enable_flow"]):
+                return error_messages.COMMAND_MALFORMED
+
+            flow_id = command[command_byte_structures["enable_flow"]["flow_id"]]
+            
+            current_flow = seek_flow(flow_id)
+
+            current_flow.nodered_flow_dict["disabled"] = False
+
+            template_loader.upload_flow_to_nodered(current_flow, True)
+        
+        case action_bytes.DISABLE_FLOW:
+
+            if len(command) is not len(command_byte_structures["disable_flow"]):
+                return error_messages.COMMAND_MALFORMED
+
+            flow_id = command[command_byte_structures["disable_flow"]["flow_id"]]
+            
+            current_flow = seek_flow(flow_id)
+
+            current_flow.nodered_flow_dict["disabled"] = True
+
+            template_loader.upload_flow_to_nodered(current_flow, True)
+
+        case action_bytes.REMOVE_FLOW:
+
+            if len(command) is not len(command_byte_structures["remove_flow"]):
+                return error_messages.COMMAND_MALFORMED
+
+            flow_id = command[command_byte_structures["remove_flow"]["flow_id"]]
+            
+            current_flow = seek_flow(flow_id)            
+
+            template_loader.delete_flow_from_nodered(current_flow)
+
+            delete_flow(flow_id)
+
         case action_bytes.FLOW_COMPLETE:
 
             # TODO: This sanity check does not really work if we plan to use more than bytes in commands!!!
@@ -316,15 +363,15 @@ def parse_compressed_command(command) -> int:
 
             flow_id = command[command_byte_structures["flow_complete"]["flow_id"]]
 
+            current_flow = seek_flow(flow_id)
+
             flow_filename = "lb_flow" + str(flow_id) + ".json"
 
             template_loader.compose_nodered_flow_to_json(
-                flows[flow_id], flow_filename
-            )
+                current_flow, flow_filename
+            )            
 
-            # TODO: Move to FLOW_UPLOAD action afterwards
-
-            flows[flow_id].nodered_id = template_loader.upload_flow_to_nodered(flow_filename)
+            current_flow.nodered_id = template_loader.upload_flow_to_nodered(current_flow, False)
 
         case action_bytes.ADD_NODE:
             if len(command) is not len(command_byte_structures["add_node"]):
