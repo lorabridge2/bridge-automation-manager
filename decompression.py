@@ -316,9 +316,15 @@ def parse_compressed_command(command) -> int:
 
             flow_id = command[command_byte_structures["flow_complete"]["flow_id"]]
 
+            flow_filename = "lb_flow" + str(flow_id) + ".json"
+
             template_loader.compose_nodered_flow_to_json(
-                flows[0], "lorawan_experiment.json"
+                flows[flow_id], flow_filename
             )
+
+            # TODO: Move to FLOW_UPLOAD action afterwards
+
+            flows[flow_id].nodered_id = template_loader.upload_flow_to_nodered(flow_filename)
 
         case action_bytes.ADD_NODE:
             if len(command) is not len(command_byte_structures["add_node"]):

@@ -9,6 +9,7 @@ from error_messages import error_messages
 import device_classes
 import os
 import urllib
+from urllib import request
 
 # TODO: replace eth to localhost later on bridge
 
@@ -157,6 +158,32 @@ def compose_nodered_flow_to_json(flow: LBflow, output_file: str) -> None:
 
     with open(output_file, "w") as json_file:
         json_file.write(nodered_flow_json)
+
+def upload_flow_to_nodered(input_file):
+    headers = {'Content-Type':'application/json'}
+    url = "http://" + NODERED_HOST + ":1880/flow"
+
+    with open(input_file,'r') as nr_file:
+        nr_flow = nr_file.read()
+
+        nr_flow_bin = nr_flow if type(nr_flow) == bytes else nr_flow.encode('utf-8')
+        req = request.Request(url, nr_flow_bin, headers)
+        resp = request.urlopen(req)
+
+        flow_resp_raw = resp.read()
+        
+        flow_resp = json.loads(flow_resp_raw)
+
+        flow_id = ''
+
+        if 'id' not in flow_resp:
+            print("Flow upload to Nodered failed.")
+            # TODO: Inform user 
+        else:            
+            flow_id = flow_resp['id']
+
+        return flow_id
+        
 
 
 def fetch_nodered_mqtt_broker() -> int:
