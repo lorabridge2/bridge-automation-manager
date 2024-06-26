@@ -9,6 +9,7 @@ from error_messages import error_messages
 import device_classes
 import os
 import urllib
+import hashlib
 from urllib import request
 
 # TODO: replace eth to localhost later on bridge
@@ -255,6 +256,8 @@ def get_device_ieee_id(lb_id):
     value = redis_client.hget("lorabridge:device:registry:id", lb_id)
 
     return value.decode("utf-8")
+
+
 
 def get_boolean_definitions_ieee_id(ieee_id, attribute):
     

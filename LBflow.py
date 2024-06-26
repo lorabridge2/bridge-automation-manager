@@ -3,6 +3,7 @@ class LBflow:
         self.id = id        
         self.nodes = []
         self.nodered_id = ''
-        self.nodered_flow_dict = {}
+        self.nodered_flow_dict = {}     
+        self.command_buffer = []
         self.iscomplete = False
     

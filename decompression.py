@@ -3,6 +3,7 @@ import array
 import redis
 import os
 import time
+import hashlib
 
 from enum import IntEnum
 from redis_queue_listener import RedisQueueListener
@@ -37,6 +38,7 @@ class action_bytes(IntEnum):
     ADD_FLOW = 9
     FLOW_COMPLETE = 10
     REMOVE_FLOW = 11
+    UPLOAD_FLOW = 12
 
 
 class parameter_data_types(IntEnum):
@@ -82,6 +84,7 @@ command_byte_structures = {
     "disable_flow": {"action_byte": 0, "flow_id": 1},
     "flow_complete": {"action_byte": 0, "flow_id": 1},
     "remove_flow": {"action_byte": 0, "flow_id": 1},
+    "upload_flow": {"action_byte": 0, "flow_id": 1},
     "add_node": {"action_byte": 0, "flow_id": 1, "node_id": 2, "node_type": 3},
     "add_device": {
         "action_byte": 0,
@@ -110,6 +113,25 @@ command_byte_structures = {
     },
 }
 
+def push_command_to_buffer(flow_id, command):
+    flow = seek_flow(flow_id)
+    flow.command_buffer.append(command)
+
+def flush_command_buffer(flow_id):
+    flow = seek_flow(flow_id)
+    flow.command_buffer.clear()
+
+def get_command_buffer_digest(flow : LBflow) -> str:
+    h = hashlib.sha1()
+
+    int_buffer = []
+
+    for command in flow.command_buffer:
+        int_command = [x for x in command]
+        int_buffer.append(int_command)
+
+    h.update(json.dumps(int_buffer).encode('utf-8'))
+    return h.hexdigest()
 
 def add_flow(flow_id) -> int:
 
@@ -307,21 +329,28 @@ def parse_compressed_command(command) -> int:
     match action_byte:
         case action_bytes.ADD_FLOW:
 
+            
+
             # TODO: This sanity check does not really work if we plan to use more than bytes in commands!!!
 
             if len(command) is not len(command_byte_structures["add_flow"]):
                 return error_messages.COMMAND_MALFORMED
 
             flow_id = command[command_byte_structures["add_flow"]["flow_id"]]
+
             add_flow(flow_id)
+
+            flush_command_buffer(flow_id)
+            push_command_to_buffer(flow_id, command)
+
 
         case action_bytes.ENABLE_FLOW:
 
             if len(command) is not len(command_byte_structures["enable_flow"]):
                 return error_messages.COMMAND_MALFORMED
 
-            flow_id = command[command_byte_structures["enable_flow"]["flow_id"]]
-            
+            flow_id = command[command_byte_structures["enable_flow"]["flow_id"]]            
+
             current_flow = seek_flow(flow_id)
 
             current_flow.nodered_flow_dict["disabled"] = False
@@ -369,9 +398,20 @@ def parse_compressed_command(command) -> int:
 
             template_loader.compose_nodered_flow_to_json(
                 current_flow, flow_filename
-            )            
+            )
 
-            current_flow.nodered_id = template_loader.upload_flow_to_nodered(current_flow, False)
+            print("Digest: ", get_command_buffer_digest(current_flow))            
+           
+        case action_bytes.UPLOAD_FLOW:
+
+            if len(command) is not len(command_byte_structures["upload_flow"]):
+                return error_messages.COMMAND_MALFORMED
+
+            flow_id = command[command_byte_structures["upload_flow"]["flow_id"]]
+
+            current_flow = seek_flow(flow_id)                       
+
+            current_flow.nodered_id = template_loader.upload_flow_to_nodered(current_flow, False)            
 
         case action_bytes.ADD_NODE:
             if len(command) is not len(command_byte_structures["add_node"]):
@@ -380,6 +420,8 @@ def parse_compressed_command(command) -> int:
             flow_id = command[command_byte_structures["add_node"]["flow_id"]]
             node_id = command[command_byte_structures["add_node"]["node_id"]]
             node_type = command[command_byte_structures["add_node"]["node_type"]]
+
+            push_command_to_buffer(flow_id, command)
 
             err = add_node(flow_id, node_id, node_type)
             print(err)
@@ -395,6 +437,9 @@ def parse_compressed_command(command) -> int:
             node_type = command[command_byte_structures["add_device"]["node_type"]]
             lb_device = command[command_byte_structures["add_device"]["lb_device"]]
             lb_attribute = command[command_byte_structures["add_device"]["lb_attribute"]]
+
+            push_command_to_buffer(flow_id, command)
+
             err = add_device(flow_id, node_id, node_type, lb_device, lb_attribute)
             return err
 
@@ -409,6 +454,8 @@ def parse_compressed_command(command) -> int:
             output = command[command_byte_structures["connect_node"]["output"]]
             input_node = command[command_byte_structures["connect_node"]["input_node"]]
             input = command[command_byte_structures["connect_node"]["input"]]
+
+            push_command_to_buffer(flow_id, command)
 
             err = connect_nodes(flow_id, output_node, output, input_node, input)
             print(err)
@@ -439,15 +486,14 @@ def parse_compressed_command(command) -> int:
                 command_byte_structures["parameter_update"]["content"] :
             ]
 
+            push_command_to_buffer(flow_id, command)
+
             err = parameter_update(
                 flow_id, node_id, parameter_id, bytes_num, parameter_type, raw_bytes
             )
 
             return err
         # "connect_node": {"action_byte": 0, "flow_id": 1, "output_node": 2,"output":3, "input_node": 4, "input": 5}
-
-
-# How to get active flow nodered json: curl -X GET -H "Accept: application/json" http://10.203.14.242:1880/flows -o active_flow.json
 
 
 def process_downlink_data(data):
