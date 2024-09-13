@@ -12,36 +12,28 @@ compressed_commands = []
 # add flow
 compressed_commands.append([9, 0])
 
-# add MQTT input for switch state
-
-compressed_commands.append([2, 0, 0, 3, 1, int(device_classes.DEVICE_CLASSES.index('state'))])
-
 # add MQTT output for switch
 
-compressed_commands.append([2, 0, 1, 1, 1, int(device_classes.DEVICE_CLASSES.index('state'))])
+compressed_commands.append([2, 0, 0, 1, 1, int(device_classes.DEVICE_CLASSES.index('state'))])
 
 # add timer switch
 
-compressed_commands.append([1, 0, 2, 8])
-
-# connect switch state to switch node
-# "connect_node": {"action_byte": 0, "flow_id": 1, "output_node": 2,"output":3, "input_node": 4, "input": 5},
-
-compressed_commands.append([4, 0, 0, 0, 2, 0])
+compressed_commands.append([1, 0, 1, 8])
 
 # connect timed switch to MQTT output
+# "connect_node": {"action_byte": 0, "flow_id": 1, "output_node": 2,"output":3, "input_node": 4, "input": 5},
 
-compressed_commands.append([4, 0, 2, 0, 1, 0])
+compressed_commands.append([4, 0, 1, 0, 0, 0])
 
 # update countdown parameter 
 
 #parameter_update(flow_id, node_id, parameter_id, num_bytes, parameter_type, raw_bytes)
 # "parameter_update": {"action_byte":0, "flow_id": 1, "node_id": 2, "parameter_id": 3, "bytes": 4, "type": 5, "content": 6}
 
-compressed_commands.append([3, 0, 2, 0, 1, 1, 9])
-compressed_commands.append([3, 0, 2, 1, 1, 1, 10])
-compressed_commands.append([3, 0, 2, 2, 1, 1, 15])
-compressed_commands.append([3, 0, 2, 3, 1, 1, 15])
+compressed_commands.append([3, 0, 1, 0, 1, 1, 9])
+compressed_commands.append([3, 0, 1, 1, 1, 1, 12])
+compressed_commands.append([3, 0, 1, 2, 1, 1, 15])
+compressed_commands.append([3, 0, 1, 3, 1, 1, 15])
 
 # flow complete
 

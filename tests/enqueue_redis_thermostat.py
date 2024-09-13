@@ -12,35 +12,27 @@ compressed_commands = []
 # add flow
 compressed_commands.append([9, 0])
 
-# add MQTT input for switch state
-
-compressed_commands.append([2, 0, 0, 3, 1, int(device_classes.DEVICE_CLASSES.index('state'))])
-
 # add MQTT input for temperature sensor
 # "add_device": { "action_byte": 0, "flow_id": 1, "node_id": 2, "node_type": 3, "lb_device": 4},
 
-compressed_commands.append([2, 0, 1, 4, 3, int(device_classes.DEVICE_CLASSES.index('temperature'))])
+compressed_commands.append([2, 0, 0, 4, 3, int(device_classes.DEVICE_CLASSES.index('temperature'))])
 
 # add MQTT output for switch
 
-compressed_commands.append([2, 0, 2, 1, 1, int(device_classes.DEVICE_CLASSES.index('state'))])
+compressed_commands.append([2, 0, 1, 1, 1, int(device_classes.DEVICE_CLASSES.index('state'))])
 
 # add hysteresis
 
-compressed_commands.append([1, 0, 3, 9])
-
-# connect switch state to thermostat node
-# "connect_node": {"action_byte": 0, "flow_id": 1, "output_node": 2,"output":3, "input_node": 4, "input": 5},
-
-compressed_commands.append([4, 0, 0, 0, 3, 0])
+compressed_commands.append([1, 0, 2, 9])
 
 # connect temperature to thermostat node
+# "connect_node": {"action_byte": 0, "flow_id": 1, "output_node": 2,"output":3, "input_node": 4, "input": 5},
 
-compressed_commands.append([4, 0, 1, 0, 3, 1])
+compressed_commands.append([4, 0, 0, 0, 2, 0])
 
 # connect hysteresis to MQTT output
 
-compressed_commands.append([4, 0, 3, 0, 2, 0])
+compressed_commands.append([4, 0, 2, 0, 1, 0])
 
 # update threshold parameter 
 
