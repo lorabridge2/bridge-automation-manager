@@ -1,11 +1,11 @@
 [
     {
-        "description": "MQTT output",
+        "description": "MQTT binary output",
         "id": "notset",
         "lb_device_id":"notset",
         "lb_attribute_id":"notset",
         "type": "lb_mqtt_output_binary",
-        "inputs": ["0e617a38c5a5b2b3"],
+        "inputs": ["a844f495c824780c"],
         "outputs": [],
         "parameters": [        
             {
@@ -25,7 +25,25 @@
                 "current_value": false,
                 "node_id": "0e617a38c5a5b2b3",
                 "nodekey": "func"
-            }
+            },
+            {
+                "nametag": "lb_device_attribute",
+                "current_value": "state",
+                "node_id": "c825de83715d8468",
+                "nodekey": "func"
+            },        
+            {
+                "nametag": "lb_boolean_true",
+                "current_value": true,
+                "node_id": "c825de83715d8468",
+                "nodekey": "func"
+            },
+            {
+                "nametag": "lb_boolean_false",
+                "current_value": false,
+                "node_id": "c825de83715d8468",
+                "nodekey": "func"
+            }  
             
         ]
     },
@@ -64,6 +82,67 @@
         "wires": [
             [
                 "c7e13bfc39ddf92b"
+            ]
+        ]
+    },
+    {
+        "id": "0fe3cb89b87e9ea7",
+        "type": "mqtt in",
+        "z": "",
+        "name": "",
+        "topic": "",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 520,
+        "y": 380,
+        "wires": [
+            [
+                "c825de83715d8468"
+            ]
+        ]
+    },
+    {
+        "id": "c825de83715d8468",
+        "type": "function",
+        "z": "16bd3c11959482c1",
+        "name": " input state filter",
+        "func": "\nvar newMsg;\n\n if(msg.payload.lb_device_attribute == lb_boolean_true) {\n    newMsg = { payload: true};\n}\nelse if(msg.payload.lb_device_attribute == lb_boolean_false) {\n    newMsg = { payload: false};\n}\n\nnewMsg.topic = \"binary_state\"\n\nreturn newMsg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 820,
+        "y": 380,
+        "wires": [
+            [
+                "a844f495c824780c"
+            ]
+        ]
+    },
+    {
+        "id": "a844f495c824780c",
+        "type": "function",
+        "z": "8828d12f94d26d03",
+        "name": "binary state transition",
+        "func": "if (msg.topic == \"binary_state\") {\n    context.set(\"binary_state\", msg.payload);\n    return;\n}\n\nlet old_state = context.get(\"binary_state\");\nlet new_state = msg.payload;\n\nvar newMsg = null;\n\nif (old_state == false && new_state == true) {\n    newMsg = { payload: true };\n}\n\nif (old_state == true && new_state == false) {\n    newMsg = { payload: false };\n}\n\n\nreturn newMsg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1020,
+        "y": 360,
+        "wires": [
+            [
+                "0e617a38c5a5b2b3"
             ]
         ]
     }

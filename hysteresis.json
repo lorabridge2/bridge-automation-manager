@@ -3,9 +3,9 @@
         "description": "A simple hysteresis",
         "id": "notgenerated",
         "type": "lb_hysteresis",        
-        "inputs": ["055bfbfe0c762872", "6193f0059e8908ba"],
-        "outputs": ["055bfbfe0c762872"],
-        "input_descriptions": ["binary devices state", "sensor input"],
+        "inputs": ["6193f0059e8908ba"],
+        "outputs": ["6193f0059e8908ba"],
+        "input_descriptions": ["sensor input"],
         "output_descriptions": ["controller state"],        
         "parameters": [        
                 {
@@ -24,26 +24,6 @@
         ]
     },
     {
-        "id": "055bfbfe0c762872",
-        "type": "function",
-        "z": "785fe3e2ae7c473b",
-        "name": "binary state transition",
-        "func": "if (msg.topic == \"binary_state\") {\n    context.set(\"binary_state\", msg.payload);\n    return;\n}\n\nlet old_state = context.get(\"binary_state\");\nlet new_state = msg.payload;\n\nvar newMsg = null;\n\nif (old_state == false && new_state == true) {\n    newMsg = { payload: true };\n}\n\nif (old_state == true && new_state == false) {\n    newMsg = { payload: false };\n}\n\n\nreturn newMsg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 820,
-        "y": 420,
-        "wires": [
-            [
-                "notset"
-            ]
-        ]
-    },
-    {
         "id": "6193f0059e8908ba",
         "type": "function",
         "z": "785fe3e2ae7c473b",
@@ -59,7 +39,7 @@
         "y": 420,
         "wires": [
             [
-                "055bfbfe0c762872"
+                "notset"
             ]
         ]
     }

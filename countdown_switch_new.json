@@ -3,8 +3,10 @@
         "description": "Receives binary input and holds the state for a given time",
         "id": "notgenerated",
         "type": "lb_countdown_switch",
-        "inputs": ["a844f495c824780c", "4d538f6d3957ef69"],
-        "outputs": ["a844f495c824780c"],
+        "inputs": ["4d538f6d3957ef69"],
+        "outputs": ["4d538f6d3957ef69"],
+        "input_descriptions": ["binary device input"],
+        "output_descriptions": ["countdown switch state"],  
         "parameters": [        
                 {
                     "nametag": "lb_countdown_value",
@@ -59,28 +61,9 @@
         "y": 360,
         "wires": [
             [
-                "a844f495c824780c"
-            ]
-        ]
-    },
-    {
-        "id": "a844f495c824780c",
-        "type": "function",
-        "z": "8828d12f94d26d03",
-        "name": "binary state transition",
-        "func": "if (msg.topic == \"binary_state\") {\n    context.set(\"binary_state\", msg.payload);\n    return;\n}\n\nlet old_state = context.get(\"binary_state\");\nlet new_state = msg.payload;\n\nvar newMsg = null;\n\nif (old_state == false && new_state == true) {\n    newMsg = { payload: true };\n}\n\nif (old_state == true && new_state == false) {\n    newMsg = { payload: false };\n}\n\n\nreturn newMsg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1020,
-        "y": 360,
-        "wires": [
-            [
                 "notset"
             ]
         ]
     }
+    
 ]

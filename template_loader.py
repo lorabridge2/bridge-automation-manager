@@ -77,8 +77,8 @@ def compose_nodered_flow_to_json(flow: LBflow, output_file: str) -> None:
 
             if (
                 template_nodes["type"] == "mqtt in"
-                and node.nodered_template[0]["type"] == "lb_mqtt_input_numeric"
-                or node.nodered_template[0]["type"] == "lb_mqtt_input_binary"
+                #and node.nodered_template[0]["type"] == "lb_mqtt_input_numeric"
+                #or node.nodered_template[0]["type"] == "lb_mqtt_input_binary"
             ):
                 node.nodered_template[0]["parameters"][0]["current_value"] = device_classes.DEVICE_CLASSES[node.device_attribute]
                 
@@ -106,17 +106,21 @@ def compose_nodered_flow_to_json(flow: LBflow, output_file: str) -> None:
                 if isinstance(boolean_attributes["value_on"], str):
                     node.nodered_template[0]["parameters"][1]["current_value"] = "\\\"" + boolean_attributes["value_on"] + "\\\""
                     node.nodered_template[0]["parameters"][2]["current_value"] = "\\\"" + boolean_attributes["value_off"] + "\\\""
+                    node.nodered_template[0]["parameters"][4]["current_value"] = '"' + boolean_attributes["value_on"] + '"'
+                    node.nodered_template[0]["parameters"][5]["current_value"] = '"' + boolean_attributes["value_off"] + '"'
                 if isinstance(boolean_attributes["value_on"], bool):
                     node.nodered_template[0]["parameters"][1]["current_value"] = "\"" + str(boolean_attributes["value_on"]).lower() + "\""
                     node.nodered_template[0]["parameters"][2]["current_value"] = "\"" + str(boolean_attributes["value_off"]).lower() + "\""
+                    node.nodered_template[0]["parameters"][4]["current_value"] = str(boolean_attributes["value_on"]).lower()
+                    node.nodered_template[0]["parameters"][5]["current_value"] = str(boolean_attributes["value_off"]).lower()
 
 
             
 
             if (
                 template_nodes["type"] == "mqtt out"
-                and node.nodered_template[0]["type"] == "lb_mqtt_output"
-                or node.nodered_template[0]["type"] == "lb_mqtt_output_binary"
+                #and node.nodered_template[0]["type"] == "lb_mqtt_output"
+                #or node.nodered_template[0]["type"] == "lb_mqtt_output_binary"
             ):
                 node.nodered_template[0]["parameters"][0]["current_value"] = device_classes.DEVICE_CLASSES[node.device_attribute]
                 template_nodes["topic"] = (

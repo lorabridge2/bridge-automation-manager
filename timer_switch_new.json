@@ -3,10 +3,10 @@
         "description": "Switches binary device on based on a given time window",
         "id": "notgenerated",
         "type": "lb_timer_switch",        
-        "inputs": ["4abfbf7b754df373"],
-        "outputs": ["4abfbf7b754df373"],
-        "input_descriptions": ["binary devices state"],
-        "output_descriptions": ["timer state"],        
+        "inputs": ["286e874b07561256"],
+        "outputs": ["286e874b07561256"],
+        "input_descriptions": ["binary device input"],
+        "output_descriptions": ["timer switch state"],        
         "parameters": [        
                 {
                     "nametag": "lb_timerswitch_hour_min",
@@ -79,26 +79,8 @@
         "y": 420,
         "wires": [
             [
-                "4abfbf7b754df373"
+                "notset"
             ]
-        ]
-    },
-    {
-        "id": "4abfbf7b754df373",
-        "type": "function",
-        "z": "2041e929a43ea7cf",
-        "name": "binary state transition",
-        "func": "if (msg.topic == \"binary_state\") {\n    context.set(\"binary_state\", msg.payload);\n    return;\n}\n\nlet old_state = context.get(\"binary_state\");\nlet new_state = msg.payload;\n\nvar newMsg = null;\n\nif (old_state == false && new_state == true) {\n    newMsg = { payload: true };\n}\n\nif (old_state == true && new_state == false) {\n    newMsg = { payload: false };\n}\n\n\nreturn newMsg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 960,
-        "y": 420,
-        "wires": [
-            []
         ]
     }
 ]
