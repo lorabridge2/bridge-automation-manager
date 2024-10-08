@@ -236,14 +236,8 @@ def upload_flow_to_nodered(flow: LBflow, update: bool):
         method=selected_method,
     )
 
-    print("Sending request to nodered:")
-    print(req.url)
-    print(req.body)
-    print(req.headers)
+    
     resp = request.urlopen(req)
-
-    print("Got response from nodered")
-    print(resp)
 
     flow_resp_raw = resp.read()
 
