@@ -235,7 +235,14 @@ def upload_flow_to_nodered(flow: LBflow, update: bool):
         unverifiable=False,
         method=selected_method,
     )
+
+    print("Sending request to nodered:")
+    print(req)
+
     resp = request.urlopen(req)
+
+    print("Got response from nodered")
+    print(resp)
 
     flow_resp_raw = resp.read()
 
