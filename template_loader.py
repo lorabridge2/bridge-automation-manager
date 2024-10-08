@@ -190,10 +190,10 @@ def compose_nodered_flow_to_json(flow: LBflow, output_file: str) -> None:
 
     flow.nodered_flow_dict = nodered_flow[0]
 
-    nodered_flow_json = json.dumps(nodered_flow[0], indent=4)
+    #nodered_flow_json = json.dumps(nodered_flow[0], indent=4)
 
-    with open(output_file, "w") as json_file:
-        json_file.write(nodered_flow_json)
+    #with open(output_file, "w") as json_file:
+    #    json_file.write(nodered_flow_json)
 
 
 def delete_flow_from_nodered(flow: LBflow):

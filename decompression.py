@@ -385,11 +385,11 @@ def parse_compressed_command(command) -> int:
 
             current_flow = seek_flow(flow_id)
 
-            #flow_filename = "lb_flow" + str(flow_id) + ".json"
+            flow_filename = "lb_flow" + str(flow_id) + ".json"
 
-            #template_loader.compose_nodered_flow_to_json(
-            #    current_flow, flow_filename
-            #)
+            template_loader.compose_nodered_flow_to_json(
+                current_flow, flow_filename
+            )
 
             print("Digest: ", hash(current_flow))            
            
