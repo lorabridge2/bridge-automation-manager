@@ -332,6 +332,8 @@ def parse_compressed_command(command) -> int:
 
             flow_id = command[command_byte_structures["add_flow"]["flow_id"]]
 
+            # TODO: Need to check if a flow already exists, if yes: print error
+
             add_flow(flow_id)
 
         case action_bytes.ENABLE_FLOW:
@@ -477,6 +479,8 @@ def parse_compressed_command(command) -> int:
             )
 
             return err
+    
+    return error_messages.NO_ERRORS
         # "connect_node": {"action_byte": 0, "flow_id": 1, "output_node": 2,"output":3, "input_node": 4, "input": 5}
 
 
@@ -485,7 +489,10 @@ def process_downlink_data(data):
     # This function can be customized to process the received data
     data2 = data.decode("utf-8")
     cmd_array = bytearray.fromhex(data2)
-    parse_compressed_command(cmd_array)
+    err_msg = parse_compressed_command(cmd_array)
+
+    if err_msg != error_messages.NO_ERRORS:
+        print("Parsing error: ",err_msg)
 
 
 if __name__ == "__main__":
