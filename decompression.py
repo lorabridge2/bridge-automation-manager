@@ -126,7 +126,12 @@ def add_flow(flow_id) -> int:
 
 def delete_flow(flow_id) -> int:
 
-    flows.remove(seek_flow(flow_id))
+    _flow = seek_flow(flow_id)
+
+    if _flow == None:
+        return error_messages.FLOW_NOT_FOUND
+    else:
+        flows.remove(seek_flow(flow_id))
 
 # TODO: might be better to provide flows as parameter
 
@@ -320,8 +325,6 @@ def parse_compressed_command(command) -> int:
     match action_byte:
         case action_bytes.ADD_FLOW:
 
-            
-
             # TODO: This sanity check does not really work if we plan to use more than bytes in commands!!!
 
             if len(command) is not len(command_byte_structures["add_flow"]):
@@ -330,9 +333,6 @@ def parse_compressed_command(command) -> int:
             flow_id = command[command_byte_structures["add_flow"]["flow_id"]]
 
             add_flow(flow_id)
-
-            
-
 
         case action_bytes.ENABLE_FLOW:
 
@@ -366,10 +366,11 @@ def parse_compressed_command(command) -> int:
                 return error_messages.COMMAND_MALFORMED
 
             flow_id = command[command_byte_structures["remove_flow"]["flow_id"]]
-            
+                        
             current_flow = seek_flow(flow_id)            
 
-            template_loader.delete_flow_from_nodered(current_flow)
+            if current_flow != None:
+                template_loader.delete_flow_from_nodered(current_flow)
 
             delete_flow(flow_id)
 
@@ -384,11 +385,11 @@ def parse_compressed_command(command) -> int:
 
             current_flow = seek_flow(flow_id)
 
-            flow_filename = "lb_flow" + str(flow_id) + ".json"
+            #flow_filename = "lb_flow" + str(flow_id) + ".json"
 
-            template_loader.compose_nodered_flow_to_json(
-                current_flow, flow_filename
-            )
+            #template_loader.compose_nodered_flow_to_json(
+            #    current_flow, flow_filename
+            #)
 
             print("Digest: ", hash(current_flow))            
            
@@ -401,7 +402,8 @@ def parse_compressed_command(command) -> int:
 
             current_flow = seek_flow(flow_id)                       
 
-            current_flow.nodered_id = template_loader.upload_flow_to_nodered(current_flow, False)            
+            if current_flow != None:
+                current_flow.nodered_id = template_loader.upload_flow_to_nodered(current_flow, False)            
 
         case action_bytes.ADD_NODE:
             if len(command) is not len(command_byte_structures["add_node"]):
