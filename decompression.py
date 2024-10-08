@@ -488,6 +488,9 @@ def process_downlink_data(data):
     print("Processing downlink data")
     # This function can be customized to process the received data
     data2 = data.decode("utf-8")
+
+    print("Parser got following hex string:", data2)
+
     cmd_array = bytearray.fromhex(data2)
     err_msg = parse_compressed_command(cmd_array)
 
