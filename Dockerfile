@@ -1,4 +1,4 @@
-FROM python:3.10-alpine as build
+FROM python:3.10-alpine AS build
 
 WORKDIR /home/decompression
 RUN apk add --no-cache gcc libc-dev g++
