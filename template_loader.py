@@ -11,6 +11,7 @@ import os
 import urllib
 import hashlib
 from urllib import request
+from urllib import error
 
 # TODO: replace eth to localhost later on bridge
 
@@ -210,9 +211,16 @@ def delete_flow_from_nodered(flow: LBflow):
         unverifiable=False,
         method=selected_method,
     )
-    resp = request.urlopen(req)
 
-    print("Flow deletion result:", resp.read())
+    try:
+        resp = request.urlopen(req)
+    except error.HTTPError as e:
+        print("Nodered API request returned HTTP error: ", e.code)
+        exit(0)
+    except error.URLError as e:
+        print("Nodered API request returned URL error: ", e.reason)
+    else:
+        print("Flow deletion result:", resp.read())
 
 
 def upload_flow_to_nodered(flow: LBflow, update: bool):

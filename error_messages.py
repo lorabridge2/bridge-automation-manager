@@ -11,3 +11,4 @@ class error_messages(IntEnum):
     NODE_TYPE_NOT_FOUND = 7
     MQTT_BROKER_NOT_FOUND = 8
     PARAMETER_NOT_FOUND = 9
+    DUPLICATE_FOUND = 10

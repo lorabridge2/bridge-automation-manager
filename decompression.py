@@ -74,7 +74,6 @@ node_template_files_dictionary = {
 
 # Same as above
 
-
 # TODO: Need more fine grained description with byte index and width in bytes
 # optionally, just place "node_id_b1" and "node_id_b2" to describe multi byte fields
 
@@ -118,6 +117,10 @@ command_byte_structures = {
 def add_flow(flow_id) -> int:
 
     # TODO: if flow exists, but is not complete: reset flow (remove nodes etc)
+    _flow = seek_flow(flow_id)
+
+    if _flow != None:
+        return error_messages.DUPLICATE_FOUND
 
     flows.append(LBflow(flow_id))
 
@@ -330,11 +333,11 @@ def parse_compressed_command(command) -> int:
             if len(command) is not len(command_byte_structures["add_flow"]):
                 return error_messages.COMMAND_MALFORMED
 
-            flow_id = command[command_byte_structures["add_flow"]["flow_id"]]
+            flow_id = command[command_byte_structures["add_flow"]["flow_id"]]           
 
-            # TODO: Need to check if a flow already exists, if yes: print error
+            err = add_flow(flow_id)
 
-            add_flow(flow_id)
+            print(err)
 
         case action_bytes.ENABLE_FLOW:
 
@@ -344,6 +347,9 @@ def parse_compressed_command(command) -> int:
             flow_id = command[command_byte_structures["enable_flow"]["flow_id"]]            
 
             current_flow = seek_flow(flow_id)
+
+            if current_flow == None:
+                return error_messages.FLOW_NOT_FOUND
 
             current_flow.nodered_flow_dict["disabled"] = False
 
@@ -357,6 +363,9 @@ def parse_compressed_command(command) -> int:
             flow_id = command[command_byte_structures["disable_flow"]["flow_id"]]
             
             current_flow = seek_flow(flow_id)
+
+            if current_flow == None:
+                return error_messages.FLOW_NOT_FOUND
 
             current_flow.nodered_flow_dict["disabled"] = True
 
@@ -373,8 +382,11 @@ def parse_compressed_command(command) -> int:
 
             if current_flow != None:
                 template_loader.delete_flow_from_nodered(current_flow)
+                delete_flow(flow_id)
+            else:
+                return error_messages.FLOW_NOT_FOUND
 
-            delete_flow(flow_id)
+            
 
         case action_bytes.FLOW_COMPLETE:
 
@@ -386,6 +398,9 @@ def parse_compressed_command(command) -> int:
             flow_id = command[command_byte_structures["flow_complete"]["flow_id"]]
 
             current_flow = seek_flow(flow_id)
+
+            if current_flow == None:
+                return error_messages.FLOW_NOT_FOUND
 
             flow_filename = "lb_flow" + str(flow_id) + ".json"
 
@@ -405,7 +420,9 @@ def parse_compressed_command(command) -> int:
             current_flow = seek_flow(flow_id)                       
 
             if current_flow != None:
-                current_flow.nodered_id = template_loader.upload_flow_to_nodered(current_flow, False)            
+                current_flow.nodered_id = template_loader.upload_flow_to_nodered(current_flow, False)        
+            else:               
+                return error_messages.FLOW_NOT_FOUND    
 
         case action_bytes.ADD_NODE:
             if len(command) is not len(command_byte_structures["add_node"]):
@@ -414,6 +431,16 @@ def parse_compressed_command(command) -> int:
             flow_id = command[command_byte_structures["add_node"]["flow_id"]]
             node_id = command[command_byte_structures["add_node"]["node_id"]]
             node_type = command[command_byte_structures["add_node"]["node_type"]]
+
+            current_flow = seek_flow(flow_id)
+
+            if current_flow == None:
+                return error_messages.FLOW_NOT_FOUND
+
+            _node = seek_node(flow_id, node_id)
+
+            if _node != None:
+                return error_messages.DUPLICATE_FOUND
 
             err = add_node(flow_id, node_id, node_type)
             print(err)
@@ -430,6 +457,17 @@ def parse_compressed_command(command) -> int:
             lb_device = command[command_byte_structures["add_device"]["lb_device"]]
             lb_attribute = command[command_byte_structures["add_device"]["lb_attribute"]]
 
+            current_flow = seek_flow(flow_id)
+
+            if current_flow == None:
+                return error_messages.FLOW_NOT_FOUND
+
+            _node = seek_node(flow_id, node_id)
+
+            if _node != None:
+                return error_messages.DUPLICATE_FOUND
+
+
             err = add_device(flow_id, node_id, node_type, lb_device, lb_attribute)
             return err
 
@@ -444,6 +482,19 @@ def parse_compressed_command(command) -> int:
             output = command[command_byte_structures["connect_node"]["output"]]
             input_node = command[command_byte_structures["connect_node"]["input_node"]]
             input = command[command_byte_structures["connect_node"]["input"]]
+
+            current_flow = seek_flow(flow_id)
+            if current_flow == None:
+                return error_messages.FLOW_NOT_FOUND
+            
+            _input_node = seek_node(flow_id,input_node)
+            if _input_node == None:
+                return error_messages.NODE_NOT_FOUND
+            
+            _output_node = seek_node(flow_id,output_node)
+            if _output_node == None:
+                return error_messages.NODE_NOT_FOUND
+
 
             err = connect_nodes(flow_id, output_node, output, input_node, input)
             print(err)
@@ -473,6 +524,16 @@ def parse_compressed_command(command) -> int:
             raw_bytes = command[
                 command_byte_structures["parameter_update"]["content"] :
             ]
+
+            current_flow = seek_flow(flow_id)
+
+            if current_flow == None:
+                return error_messages.FLOW_NOT_FOUND
+
+            _node = seek_node(flow_id, node_id)
+
+            if _node == None:
+                return error_messages.NODE_NOT_FOUND
 
             err = parameter_update(
                 flow_id, node_id, parameter_id, bytes_num, parameter_type, raw_bytes
