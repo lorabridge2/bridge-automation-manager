@@ -2,6 +2,7 @@ import json
 import array
 import redis
 import os
+import traceback
 import time
 import hashlib
 import threading
@@ -70,7 +71,7 @@ node_template_files_dictionary = {
     node_bytes.NUMERIC_SENSOR.value: "mqtt_in_numeric.json",
     node_bytes.HYSTERESIS: "hysteresis.json",
     node_bytes.LOGIC_AND: "logical_and.json",
-    node_bytes.LOGIC_OR: "logical_or.json"
+    node_bytes.LOGIC_OR: "logical_or.json",
 }
 
 # Same as above
@@ -135,6 +136,7 @@ def delete_flow(flow_id) -> int:
         return error_messages.FLOW_NOT_FOUND
     else:
         flows.remove(seek_flow(flow_id))
+
 
 # TODO: might be better to provide flows as parameter
 
@@ -205,15 +207,17 @@ def add_device(flow_id, node_id, node_type, lb_device, lb_attribute) -> int:
 
 def remove_node(flow_id, node_id, node_type) -> int:
     # TODO: traverse entire flow and remove connections first, then remove the node
-     return error_messages.NO_ERRORS
+    return error_messages.NO_ERRORS
 
 
 def disconnect_nodes(flow_id, output_node_id, output_id) -> int:
-     # TODO: Remove wires from output node (output_id)
+    # TODO: Remove wires from output node (output_id)
 
-     return error_messages.NO_ERRORS
+    return error_messages.NO_ERRORS
+
 
 # TODO: Get output nodered id
+
 
 def connect_nodes(flow_id, output_node_id, output_id, input_node_id, input_id) -> int:
 
@@ -333,7 +337,7 @@ def parse_compressed_command(command) -> int:
             if len(command) is not len(command_byte_structures["add_flow"]):
                 return error_messages.COMMAND_MALFORMED
 
-            flow_id = command[command_byte_structures["add_flow"]["flow_id"]]           
+            flow_id = command[command_byte_structures["add_flow"]["flow_id"]]
 
             err = add_flow(flow_id)
 
@@ -344,7 +348,7 @@ def parse_compressed_command(command) -> int:
             if len(command) is not len(command_byte_structures["enable_flow"]):
                 return error_messages.COMMAND_MALFORMED
 
-            flow_id = command[command_byte_structures["enable_flow"]["flow_id"]]            
+            flow_id = command[command_byte_structures["enable_flow"]["flow_id"]]
 
             current_flow = seek_flow(flow_id)
 
@@ -354,14 +358,14 @@ def parse_compressed_command(command) -> int:
             current_flow.nodered_flow_dict["disabled"] = False
 
             template_loader.upload_flow_to_nodered(current_flow, True)
-        
+
         case action_bytes.DISABLE_FLOW:
 
             if len(command) is not len(command_byte_structures["disable_flow"]):
                 return error_messages.COMMAND_MALFORMED
 
             flow_id = command[command_byte_structures["disable_flow"]["flow_id"]]
-            
+
             current_flow = seek_flow(flow_id)
 
             if current_flow == None:
@@ -377,16 +381,14 @@ def parse_compressed_command(command) -> int:
                 return error_messages.COMMAND_MALFORMED
 
             flow_id = command[command_byte_structures["remove_flow"]["flow_id"]]
-                        
-            current_flow = seek_flow(flow_id)            
+
+            current_flow = seek_flow(flow_id)
 
             if current_flow != None:
                 template_loader.delete_flow_from_nodered(current_flow)
                 delete_flow(flow_id)
             else:
                 return error_messages.FLOW_NOT_FOUND
-
-            
 
         case action_bytes.FLOW_COMPLETE:
 
@@ -404,12 +406,10 @@ def parse_compressed_command(command) -> int:
 
             flow_filename = "lb_flow" + str(flow_id) + ".json"
 
-            template_loader.compose_nodered_flow_to_json(
-                current_flow, flow_filename
-            )
+            template_loader.compose_nodered_flow_to_json(current_flow, flow_filename)
 
-            print("Digest: ", hash(current_flow))            
-           
+            print("Digest: ", hash(current_flow))
+
         case action_bytes.UPLOAD_FLOW:
 
             if len(command) is not len(command_byte_structures["upload_flow"]):
@@ -417,12 +417,14 @@ def parse_compressed_command(command) -> int:
 
             flow_id = command[command_byte_structures["upload_flow"]["flow_id"]]
 
-            current_flow = seek_flow(flow_id)                       
+            current_flow = seek_flow(flow_id)
 
             if current_flow != None:
-                current_flow.nodered_id = template_loader.upload_flow_to_nodered(current_flow, False)        
-            else:               
-                return error_messages.FLOW_NOT_FOUND    
+                current_flow.nodered_id = template_loader.upload_flow_to_nodered(
+                    current_flow, False
+                )
+            else:
+                return error_messages.FLOW_NOT_FOUND
 
         case action_bytes.ADD_NODE:
             if len(command) is not len(command_byte_structures["add_node"]):
@@ -455,7 +457,9 @@ def parse_compressed_command(command) -> int:
             node_id = command[command_byte_structures["add_device"]["node_id"]]
             node_type = command[command_byte_structures["add_device"]["node_type"]]
             lb_device = command[command_byte_structures["add_device"]["lb_device"]]
-            lb_attribute = command[command_byte_structures["add_device"]["lb_attribute"]]
+            lb_attribute = command[
+                command_byte_structures["add_device"]["lb_attribute"]
+            ]
 
             current_flow = seek_flow(flow_id)
 
@@ -466,7 +470,6 @@ def parse_compressed_command(command) -> int:
 
             if _node != None:
                 return error_messages.DUPLICATE_FOUND
-
 
             err = add_device(flow_id, node_id, node_type, lb_device, lb_attribute)
             return err
@@ -486,15 +489,14 @@ def parse_compressed_command(command) -> int:
             current_flow = seek_flow(flow_id)
             if current_flow == None:
                 return error_messages.FLOW_NOT_FOUND
-            
-            _input_node = seek_node(flow_id,input_node)
+
+            _input_node = seek_node(flow_id, input_node)
             if _input_node == None:
                 return error_messages.NODE_NOT_FOUND
-            
-            _output_node = seek_node(flow_id,output_node)
+
+            _output_node = seek_node(flow_id, output_node)
             if _output_node == None:
                 return error_messages.NODE_NOT_FOUND
-
 
             err = connect_nodes(flow_id, output_node, output, input_node, input)
             print(err)
@@ -540,9 +542,9 @@ def parse_compressed_command(command) -> int:
             )
 
             return err
-    
+
     return error_messages.NO_ERRORS
-        # "connect_node": {"action_byte": 0, "flow_id": 1, "output_node": 2,"output":3, "input_node": 4, "input": 5}
+    # "connect_node": {"action_byte": 0, "flow_id": 1, "output_node": 2,"output":3, "input_node": 4, "input": 5}
 
 
 def process_downlink_data(data):
@@ -556,12 +558,14 @@ def process_downlink_data(data):
     err_msg = parse_compressed_command(cmd_array)
 
     if err_msg != error_messages.NO_ERRORS:
-        print("Parsing error: ",err_msg)
+        print("Parsing error: ", err_msg)
+
 
 def excepthook(args):
     print(args)
-    print(args.thread)
-    exit(1)
+    traceback.print_tb(args.exc_traceback)
+    os._exit(1)
+
 
 if __name__ == "__main__":
     threading.excepthook = excepthook
@@ -575,12 +579,12 @@ if __name__ == "__main__":
         },
         process_downlink_data,
     )
-    
+
     queue_listener.start()
-    #queue_listener.join()
+    # queue_listener.join()
 
     # # Keep the main thread alive
-    # 
+    #
     # Zombie code below activated just to enable Keyboard interrupt ;) -Haru
 
     try:
