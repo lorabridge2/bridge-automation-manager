@@ -4,6 +4,7 @@ import redis
 import os
 import time
 import hashlib
+import threading
 
 from enum import IntEnum
 from redis_queue_listener import RedisQueueListener
@@ -111,7 +112,6 @@ command_byte_structures = {
         "content": 6,
     },
 }
-
 
 
 def add_flow(flow_id) -> int:
@@ -558,8 +558,13 @@ def process_downlink_data(data):
     if err_msg != error_messages.NO_ERRORS:
         print("Parsing error: ",err_msg)
 
+def excepthook(args):
+    print(args)
+    print(args.thread)
+    exit(1)
 
 if __name__ == "__main__":
+    threading.excepthook = excepthook
     # Replace 'my_queue' with the name of your Redis queue
     queue_listener = RedisQueueListener(
         "__keyspace@0__:lbcommands",
