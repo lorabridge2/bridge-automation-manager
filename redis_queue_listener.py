@@ -20,7 +20,7 @@ class RedisQueueListener(threading.Thread):
         # )
 
     def run(self):
-        while item := self.redis_conn.rpop():
+        while item := self.redis_conn.rpop("lbcommands"):
             self.callback(item)
 
         for message in self.pubsub.listen():
