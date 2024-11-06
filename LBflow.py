@@ -9,5 +9,5 @@ class LBflow:
         self.iscomplete = False
     
     def __hash__(self) -> int:
-        return hash(pickle.dumps(self.nodes))
+        return str(hex(hash(pickle.dumps(self.nodes)))[-16:])
     

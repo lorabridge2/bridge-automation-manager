@@ -22,6 +22,14 @@ compressed_commands = []
 debug_print = True
 
 
+redis_client = redis.Redis(
+    host=os.environ.get("REDIS_HOST", "localhost"),
+    port=int(os.environ.get("REDIS_PORT", 6379)),
+    db=int(os.environ.get("REDIS_DB", 0)),
+)
+
+REDIS_FLOW_DIGESTS = "lorabridge:flows:digests"
+
 new_node = LBnode(1, 2)
 
 # TODO: These should not be hard coded, but loaded from a config file (json?)
@@ -408,7 +416,15 @@ def parse_compressed_command(command) -> int:
 
             template_loader.compose_nodered_flow_to_json(current_flow, flow_filename)
 
-            print("Digest: ", hash(current_flow))
+            flow_digest = hash(current_flow)
+
+            flow_digest_dict = {"lbflow_digest": f"{flow_id:02x}"+flow_digest}
+
+            print("Digest: ", flow_digest)
+
+            # Push flow_id + digest (64 bits -> 8xhex) to a redis queue
+
+            redis_client.lpush(REDIS_FLOW_DIGESTS, json.dumps(flow_digest_dict))
 
         case action_bytes.UPLOAD_FLOW:
 
