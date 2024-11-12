@@ -16,6 +16,7 @@ from LBflow import LBflow
 from LBdevice import LBdevice
 
 import template_loader
+import device_classes
 
 flows = []
 compressed_commands = []
@@ -29,6 +30,7 @@ redis_client = redis.Redis(
 )
 
 REDIS_FLOW_DIGESTS = "lorabridge:flows:digests"
+REDIS_DEVICE_JOIN = "lorabridge:device:join"
 
 new_node = LBnode(1, 2)
 
@@ -49,6 +51,7 @@ class action_bytes(IntEnum):
     FLOW_COMPLETE = 10
     REMOVE_FLOW = 11
     UPLOAD_FLOW = 12
+    GET_DEVICES = 13
 
 
 class parameter_data_types(IntEnum):
@@ -120,6 +123,9 @@ command_byte_structures = {
         "type": 5,
         "content": 6,
     },
+    "get_devices": {
+        "action_byte":0
+    }
 }
 
 
@@ -317,6 +323,19 @@ def remove_node(flow_id, node_id) -> int:
     # TODO IMPLEMENT, not return all ok
     raise NotImplementedError()
 
+def pull_device_update():
+
+    device_keys = redis_client.execute_command("HKEYS lorabridge:device:registry:id")
+
+    for device_key in device_keys:
+        ieee_id = redis_client.execute_command("HGET lorabridge:device:registry:id "+device_key)
+        dev_attributes = redis_client.execute_command("SMEMBERS lorabridge:device:attributes:" + ieee_id)
+        dev_join_dict = {"lbdevice_join": [device_key]}
+        for dev_attribute in dev_attributes:
+            if dev_attribute in device_classes.DEVICE_CLASSES:
+                dev_join_dict["lbdevice_join"].append(device_classes.DEVICE_CLASSES.index(dev_attribute))
+        redis_client.lpush(REDIS_DEVICE_JOIN, json.dumps(dev_join_dict))
+  
 
 def parse_compressed_command(command) -> int:
     # Sanity checks:
@@ -423,7 +442,8 @@ def parse_compressed_command(command) -> int:
             print("Digest: ", flow_digest)
 
             # Push flow_id + digest (64 bits -> 8xhex) to a redis queue
-
+                
+            
             redis_client.lpush(REDIS_FLOW_DIGESTS, json.dumps(flow_digest_dict))
 
         case action_bytes.UPLOAD_FLOW:
@@ -558,6 +578,9 @@ def parse_compressed_command(command) -> int:
             )
 
             return err
+        
+        case action_bytes.GET_DEVICES:
+            pull_device_update()
 
     return error_messages.NO_ERRORS
     # "connect_node": {"action_byte": 0, "flow_id": 1, "output_node": 2,"output":3, "input_node": 4, "input": 5}
