@@ -72,6 +72,7 @@ class node_bytes(IntEnum):
     TIMER_SWITCH = 8
     HYSTERESIS = 9
     COUNTDOWN_SWITCH = 10
+    USER_EVENT = 11
 
 
 node_template_files_dictionary = {
@@ -83,6 +84,7 @@ node_template_files_dictionary = {
     node_bytes.HYSTERESIS: "hysteresis.json",
     node_bytes.LOGIC_AND: "logical_and.json",
     node_bytes.LOGIC_OR: "logical_or.json",
+    node_bytes.USER_EVENT: "user_event.json",
 }
 
 # Same as above

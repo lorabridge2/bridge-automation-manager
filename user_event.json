@@ -1,0 +1,60 @@
+[
+    {
+        "description": "Receives arbitrary input, which triggers user message to be sent towards gateway.",
+        "id": "notgenerated",
+        "type": "lb_user_event",
+        "inputs": ["1dab1fce0a034679"],
+        "outputs": [],
+        "input_descriptions": ["trigger input"],
+        "output_descriptions": [],  
+        "parameters": [        
+                {
+                    "nametag": "lb_user_message",
+                    "current_value": "empty",
+                    "node_id": "1dab1fce0a034679",
+                    "nodekey": "func"
+                }                 
+        ]
+    },
+    {
+        "id": "1dab1fce0a034679",
+        "type": "function",
+        "z": "3e2a724c823cfe47",
+        "name": "function 5",
+        "func": "msg.payload = {\"user_event\": \"lb_user_message\"}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 600,
+        "y": 400,
+        "wires": [
+            [
+                "d5dd769fe9f6448f"
+            ]
+        ]
+    },
+    {
+        "id": "d5dd769fe9f6448f",
+        "type": "redis-out",
+        "z": "3e2a724c823cfe47",
+        "server": "b326a031371b0a14",
+        "command": "lpush",
+        "name": "",
+        "topic": "lorabridge:events:user",
+        "obj": true,
+        "x": 890,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "b326a031371b0a14",
+        "type": "redis-config",
+        "name": "redis",
+        "options": "{\"port\":6379,\"host\":\"redis\"}",
+        "cluster": false,
+        "optionsType": "json"
+    }
+]
