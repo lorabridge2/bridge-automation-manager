@@ -437,7 +437,7 @@ def parse_compressed_command(command) -> int:
 
             flow_digest = hash(current_flow)
 
-            flow_digest_dict = {"lbflow_digest": f"{flow_id:02x}"+flow_digest}
+            flow_digest_dict = {"lbflow_digest": bytes([flow_id])+flow_digest}
 
             print("Digest: ", flow_digest)
 
