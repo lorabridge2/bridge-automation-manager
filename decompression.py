@@ -332,7 +332,7 @@ def pull_device_update():
     for device_key in device_keys:
         ieee_id = redis_client.execute_command("HGET lorabridge:device:registry:id "+device_key.decode('utf-8'))
         dev_attributes = redis_client.execute_command("SMEMBERS lorabridge:device:attributes:" + ieee_id.decode('utf-8'))
-        dev_join_dict = {"lbdevice_join": [device_key]}
+        dev_join_dict = {"lbdevice_join": [ int.from_bytes(device_key, 'big')]}
         for dev_attribute in dev_attributes:
             if dev_attribute in device_classes.DEVICE_CLASSES:
                 dev_join_dict["lbdevice_join"].append(device_classes.DEVICE_CLASSES.index(dev_attribute))
