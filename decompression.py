@@ -481,6 +481,8 @@ def parse_compressed_command(command) -> int:
 
             if _node != None:
                 return error_messages.DUPLICATE_FOUND
+            
+            current_flow.raw_commands.append(command)
 
             err = add_node(flow_id, node_id, node_type)
             print(err)
@@ -508,6 +510,8 @@ def parse_compressed_command(command) -> int:
 
             if _node != None:
                 return error_messages.DUPLICATE_FOUND
+            
+            current_flow.raw_commands.append(command)
 
             err = add_device(flow_id, node_id, node_type, lb_device, lb_attribute)
             return err
@@ -535,6 +539,8 @@ def parse_compressed_command(command) -> int:
             _output_node = seek_node(flow_id, output_node)
             if _output_node == None:
                 return error_messages.NODE_NOT_FOUND
+            
+            current_flow.raw_commands.append(command)
 
             err = connect_nodes(flow_id, output_node, output, input_node, input)
             print(err)
@@ -574,6 +580,8 @@ def parse_compressed_command(command) -> int:
 
             if _node == None:
                 return error_messages.NODE_NOT_FOUND
+            
+            current_flow.raw_commands.append(command)
 
             err = parameter_update(
                 flow_id, node_id, parameter_id, bytes_num, parameter_type, raw_bytes
