@@ -4,8 +4,8 @@ import redis
 import os
 import traceback
 import time
-import hashlib
 import threading
+import xxhash
 
 from enum import IntEnum
 from redis_queue_listener import RedisQueueListener
@@ -125,9 +125,7 @@ command_byte_structures = {
         "type": 5,
         "content": 6,
     },
-    "get_devices": {
-        "action_byte":0
-    }
+    "get_devices": {"action_byte": 0},
 }
 
 
@@ -325,19 +323,26 @@ def remove_node(flow_id, node_id) -> int:
     # TODO IMPLEMENT, not return all ok
     raise NotImplementedError()
 
+
 def pull_device_update():
 
     device_keys = redis_client.execute_command("HKEYS lorabridge:device:registry:id")
 
     for device_key in device_keys:
-        ieee_id = redis_client.execute_command("HGET lorabridge:device:registry:id "+device_key.decode('utf-8'))
-        dev_attributes = redis_client.execute_command("SMEMBERS lorabridge:device:attributes:" + ieee_id.decode('utf-8'))
-        dev_join_dict = {"lbdevice_join": [ int.from_bytes(device_key, 'big')]}
+        ieee_id = redis_client.execute_command(
+            "HGET lorabridge:device:registry:id " + device_key.decode("utf-8")
+        )
+        dev_attributes = redis_client.execute_command(
+            "SMEMBERS lorabridge:device:attributes:" + ieee_id.decode("utf-8")
+        )
+        dev_join_dict = {"lbdevice_join": [int.from_bytes(device_key, "big")]}
         for dev_attribute in dev_attributes:
             if dev_attribute in device_classes.DEVICE_CLASSES:
-                dev_join_dict["lbdevice_join"].append(device_classes.DEVICE_CLASSES.index(dev_attribute))
+                dev_join_dict["lbdevice_join"].append(
+                    device_classes.DEVICE_CLASSES.index(dev_attribute)
+                )
         redis_client.lpush(REDIS_DEVICE_JOIN, json.dumps(dev_join_dict))
-  
+
 
 def parse_compressed_command(command) -> int:
     # Sanity checks:
@@ -437,15 +442,15 @@ def parse_compressed_command(command) -> int:
 
             template_loader.compose_nodered_flow_to_json(current_flow, flow_filename)
 
-            flow_digest = hash(current_flow)
+            # flow_digest = hash(current_flow)
+            flow_digest = xxhash.xxh64(current_flow).digest()
 
-            flow_digest_dict = {"lbflow_digest": bytes([flow_id])+flow_digest}
+            flow_digest_dict = {"lbflow_digest": bytes([flow_id]) + flow_digest}
 
             print("Digest: ", flow_digest)
 
             # Push flow_id + digest (64 bits -> 8xhex) to a redis queue
-                
-            
+
             redis_client.lpush(REDIS_FLOW_DIGESTS, json.dumps(flow_digest_dict))
 
         case action_bytes.UPLOAD_FLOW:
@@ -580,7 +585,7 @@ def parse_compressed_command(command) -> int:
             )
 
             return err
-        
+
         case action_bytes.GET_DEVICES:
             pull_device_update()
 
