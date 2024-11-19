@@ -333,6 +333,7 @@ def pull_device_update():
         dev_attributes = redis_client.execute_command(
             "SMEMBERS lorabridge:device:attributes:" + ieee_id.decode("utf-8")
         )
+        dev_attributes = [item.decode() for item in dev_attributes]
         dev_join = int(device_key).to_bytes(1, "big")
         # dev_join_dict = {"lbdevice_join": [int.from_bytes(device_key, "big")]} # results in 49 for b"1"
         for dev_attribute in dev_attributes:
