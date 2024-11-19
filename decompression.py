@@ -125,9 +125,7 @@ command_byte_structures = {
         "type": 5,
         "content": 6,
     },
-    "get_devices": {
-        "action_byte":0
-    }
+    "get_devices": {"action_byte": 0},
 }
 
 
@@ -279,9 +277,7 @@ def disconnect_nodes(flow_id, output_node_id, output_id) -> int:
     return error_messages.NO_ERRORS
 
 
-def parameter_update(
-    flow_id, node_id, parameter_id, num_bytes, parameter_type, raw_bytes
-):
+def parameter_update(flow_id, node_id, parameter_id, num_bytes, parameter_type, raw_bytes):
     _flow = seek_flow(flow_id)
     if _flow == None:
         return error_messages.FLOW_NOT_FOUND
@@ -325,19 +321,25 @@ def remove_node(flow_id, node_id) -> int:
     # TODO IMPLEMENT, not return all ok
     raise NotImplementedError()
 
+
 def pull_device_update():
 
     device_keys = redis_client.execute_command("HKEYS lorabridge:device:registry:id")
 
     for device_key in device_keys:
-        ieee_id = redis_client.execute_command("HGET lorabridge:device:registry:id "+device_key.decode('utf-8'))
-        dev_attributes = redis_client.execute_command("SMEMBERS lorabridge:device:attributes:" + ieee_id.decode('utf-8'))
-        dev_join_dict = {"lbdevice_join": [ int.from_bytes(device_key, 'big')]}
+        ieee_id = redis_client.execute_command(
+            "HGET lorabridge:device:registry:id " + device_key.decode("utf-8")
+        )
+        dev_attributes = redis_client.execute_command(
+            "SMEMBERS lorabridge:device:attributes:" + ieee_id.decode("utf-8")
+        )
+        dev_join = int(device_key).to_bytes(1, "big")
+        # dev_join_dict = {"lbdevice_join": [int.from_bytes(device_key, "big")]} # results in 49 for b"1"
         for dev_attribute in dev_attributes:
             if dev_attribute in device_classes.DEVICE_CLASSES:
-                dev_join_dict["lbdevice_join"].append(device_classes.DEVICE_CLASSES.index(dev_attribute))
-        redis_client.lpush(REDIS_DEVICE_JOIN, json.dumps(dev_join_dict))
-  
+                dev_join += device_classes.DEVICE_CLASSES.index(dev_attribute).to_bytes(1, "big")
+        redis_client.lpush(REDIS_DEVICE_JOIN, dev_join)
+
 
 def parse_compressed_command(command) -> int:
     # Sanity checks:
@@ -439,13 +441,12 @@ def parse_compressed_command(command) -> int:
 
             flow_digest = hash(current_flow)
 
-            flow_digest_dict = {"lbflow_digest": bytes([flow_id])+flow_digest}
+            flow_digest_dict = {"lbflow_digest": bytes([flow_id]) + flow_digest}
 
             print("Digest: ", flow_digest)
 
             # Push flow_id + digest (64 bits -> 8xhex) to a redis queue
-                
-            
+
             redis_client.lpush(REDIS_FLOW_DIGESTS, json.dumps(flow_digest_dict))
 
         case action_bytes.UPLOAD_FLOW:
@@ -481,7 +482,7 @@ def parse_compressed_command(command) -> int:
 
             if _node != None:
                 return error_messages.DUPLICATE_FOUND
-            
+
             current_flow.raw_commands.append(command)
 
             err = add_node(flow_id, node_id, node_type)
@@ -497,9 +498,7 @@ def parse_compressed_command(command) -> int:
             node_id = command[command_byte_structures["add_device"]["node_id"]]
             node_type = command[command_byte_structures["add_device"]["node_type"]]
             lb_device = command[command_byte_structures["add_device"]["lb_device"]]
-            lb_attribute = command[
-                command_byte_structures["add_device"]["lb_attribute"]
-            ]
+            lb_attribute = command[command_byte_structures["add_device"]["lb_attribute"]]
 
             current_flow = seek_flow(flow_id)
 
@@ -510,7 +509,7 @@ def parse_compressed_command(command) -> int:
 
             if _node != None:
                 return error_messages.DUPLICATE_FOUND
-            
+
             current_flow.raw_commands.append(command)
 
             err = add_device(flow_id, node_id, node_type, lb_device, lb_attribute)
@@ -521,9 +520,7 @@ def parse_compressed_command(command) -> int:
                 return error_messages.COMMAND_MALFORMED
 
             flow_id = command[command_byte_structures["connect_node"]["flow_id"]]
-            output_node = command[
-                command_byte_structures["connect_node"]["output_node"]
-            ]
+            output_node = command[command_byte_structures["connect_node"]["output_node"]]
             output = command[command_byte_structures["connect_node"]["output"]]
             input_node = command[command_byte_structures["connect_node"]["input_node"]]
             input = command[command_byte_structures["connect_node"]["input"]]
@@ -539,7 +536,7 @@ def parse_compressed_command(command) -> int:
             _output_node = seek_node(flow_id, output_node)
             if _output_node == None:
                 return error_messages.NODE_NOT_FOUND
-            
+
             current_flow.raw_commands.append(command)
 
             err = connect_nodes(flow_id, output_node, output, input_node, input)
@@ -560,16 +557,10 @@ def parse_compressed_command(command) -> int:
 
             flow_id = command[command_byte_structures["parameter_update"]["flow_id"]]
             node_id = command[command_byte_structures["parameter_update"]["node_id"]]
-            parameter_id = command[
-                command_byte_structures["parameter_update"]["parameter_id"]
-            ]
+            parameter_id = command[command_byte_structures["parameter_update"]["parameter_id"]]
             bytes_num = command[command_byte_structures["parameter_update"]["bytes"]]
-            parameter_type = command[
-                command_byte_structures["parameter_update"]["type"]
-            ]
-            raw_bytes = command[
-                command_byte_structures["parameter_update"]["content"] :
-            ]
+            parameter_type = command[command_byte_structures["parameter_update"]["type"]]
+            raw_bytes = command[command_byte_structures["parameter_update"]["content"] :]
 
             current_flow = seek_flow(flow_id)
 
@@ -580,7 +571,7 @@ def parse_compressed_command(command) -> int:
 
             if _node == None:
                 return error_messages.NODE_NOT_FOUND
-            
+
             current_flow.raw_commands.append(command)
 
             err = parameter_update(
@@ -588,7 +579,7 @@ def parse_compressed_command(command) -> int:
             )
 
             return err
-        
+
         case action_bytes.GET_DEVICES:
             pull_device_update()
 
