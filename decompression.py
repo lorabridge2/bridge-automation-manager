@@ -155,12 +155,12 @@ def delete_flow(flow_id) -> int:
         flows.remove(seek_flow(flow_id))
 
 def backup_flows():
-    flow_file = open('flowbackup.dat', 'w') 
+    flow_file = open('backup/flowbackup.dat', 'w')
     pickle.dump(flows, flow_file)
 
 def restore_flows():
     try:
-        with open('flowbackup.dat', 'rb') as file:
+        with open('backup/flowbackup.dat', 'rb') as file:
             obj = pickle.load(file)
             print("Flow data restored from backup file.")
             return obj
