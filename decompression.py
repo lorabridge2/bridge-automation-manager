@@ -6,6 +6,7 @@ import traceback
 import time
 import hashlib
 import threading
+import pickle
 
 from enum import IntEnum
 from redis_queue_listener import RedisQueueListener
@@ -151,8 +152,23 @@ def delete_flow(flow_id) -> int:
     else:
         flows.remove(seek_flow(flow_id))
 
+def backup_flows():
+    flow_file = open('flowbackup.dat', 'w') 
+    pickle.dump(flows, flow_file)
 
-# TODO: might be better to provide flows as parameter
+def restore_flows():
+    try:
+        with open('flowbackup.dat', 'rb') as file:
+            obj = pickle.load(file)
+            print("Flow data restored from backup file.")
+            return obj
+    except FileNotFoundError:
+        print(f"Could not restore flows: The file flowbackup.dat was not found.")
+    except pickle.UnpicklingError:
+        print("Error: The flow backup file is not a valid pickle file.")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+
 
 
 def seek_flow(_flow_id) -> LBflow:
@@ -223,11 +239,6 @@ def remove_node(flow_id, node_id, node_type) -> int:
     # TODO: traverse entire flow and remove connections first, then remove the node
     return error_messages.NO_ERRORS
 
-
-def disconnect_nodes(flow_id, output_node_id, output_id) -> int:
-    # TODO: Remove wires from output node (output_id)
-
-    return error_messages.NO_ERRORS
 
 
 # TODO: Get output nodered id
@@ -450,6 +461,8 @@ def parse_compressed_command(command) -> int:
 
             redis_client.lpush(REDIS_FLOW_DIGESTS, json.dumps(flow_digest_dict))
 
+            backup_flows()
+
         case action_bytes.UPLOAD_FLOW:
 
             if len(command) is not len(command_byte_structures["upload_flow"]):
@@ -579,6 +592,8 @@ def parse_compressed_command(command) -> int:
                 flow_id, node_id, parameter_id, bytes_num, parameter_type, raw_bytes
             )
 
+            backup_flows()
+
             return err
 
         case action_bytes.GET_DEVICES:
@@ -623,6 +638,10 @@ if __name__ == "__main__":
 
     queue_listener.start()
     # queue_listener.join()
+
+    # Restore backup flows
+
+    restore_flows()
 
     # # Keep the main thread alive
     #
