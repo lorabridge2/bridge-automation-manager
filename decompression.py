@@ -494,7 +494,7 @@ def parse_compressed_command(command) -> int:
 
             template_loader.compose_nodered_flow_to_json(current_flow, flow_filename)
 
-            flow_digest = hash(current_flow)
+            flow_digest = current_flow.hash()
 
             flow_digest_dict = {"lbflow_digest": bytes([flow_id]) + flow_digest}
 

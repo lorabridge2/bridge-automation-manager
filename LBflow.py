@@ -10,6 +10,6 @@ class LBflow:
         self.raw_commands = []            
         self.iscomplete = False
     
-    def __hash__(self) -> int:        
+    def hash(self) -> bytes:
         return bytes(bytearray.fromhex(hashlib.sha1(repr(self.raw_commands).encode()).hexdigest()[-16:]))
     
