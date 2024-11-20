@@ -368,6 +368,9 @@ def pull_device_update():
             "GET lorabridge:device:name:" + ieee_id.decode("utf-8")
         )
 
+        if manuf_name == None:
+            manuf_name = "unknown".encode("utf-8")
+
         dev_attributes = [item.decode() for item in dev_attributes]
         
         dev_name = int(device_key).to_bytes(1,"big") + ieee_id + manuf_name
