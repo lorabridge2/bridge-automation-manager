@@ -32,6 +32,7 @@ redis_client = redis.Redis(
 
 REDIS_FLOW_DIGESTS = "lorabridge:flows:digests"
 REDIS_DEVICE_JOIN = "lorabridge:device:join"
+REDIS_DEVICE_NAME = "lorabridge:device:name"
 
 new_node = LBnode(1, 2)
 
@@ -101,6 +102,7 @@ command_byte_structures = {
     "remove_flow": {"action_byte": 0, "flow_id": 1},
     "upload_flow": {"action_byte": 0, "flow_id": 1},
     "add_node": {"action_byte": 0, "flow_id": 1, "node_id": 2, "node_type": 3},
+    "remove_node": {"action_byte":0, "flow_id": 1, "node_id": 2},
     "add_device": {
         "action_byte": 0,
         "flow_id": 1,
@@ -235,8 +237,24 @@ def add_device(flow_id, node_id, node_type, lb_device, lb_attribute) -> int:
     return error_messages.NO_ERRORS
 
 
-def remove_node(flow_id, node_id, node_type) -> int:
-    # TODO: traverse entire flow and remove connections first, then remove the node
+def remove_node(flow_id, node_id) -> int:
+  
+    _flow = seek_flow(flow_id)
+
+    if _flow == None:
+        return error_messages.FLOW_NOT_FOUND
+    
+    _node = seek_node(flow_id, node_id)
+
+    if _node == None:
+        return error_messages.NODE_NOT_FOUND
+    
+    _flow.nodes.remove(_node)
+
+    for node in _flow.nodes:        
+        if node_id in node.wires:
+            node.wires.remove(node_id)
+
     return error_messages.NO_ERRORS
 
 
@@ -327,15 +345,16 @@ def parameter_update(flow_id, node_id, parameter_id, num_bytes, parameter_type, 
 # TODO: Before actual deletion, traverse all connections (wires) in flows nodes and remove all the output connections to the node being deleted
 
 
-def remove_node(flow_id, node_id) -> int:
-    # return error_messages.NO_ERRORS
-    # TODO IMPLEMENT, not return all ok
-    raise NotImplementedError()
+
+
+
 
 
 def pull_device_update():
 
     device_keys = redis_client.execute_command("HKEYS lorabridge:device:registry:id")
+
+
 
     for device_key in device_keys:
         ieee_id = redis_client.execute_command(
@@ -344,7 +363,16 @@ def pull_device_update():
         dev_attributes = redis_client.execute_command(
             "SMEMBERS lorabridge:device:attributes:" + ieee_id.decode("utf-8")
         )
+
+        manuf_name = redis_client.execute_command(
+            "GET lorabridge:device:name:" + ieee_id.decode("utf-8")
+        )
+
         dev_attributes = [item.decode() for item in dev_attributes]
+        
+        dev_name = int(device_key).to_bytes(1,"big") + bytes(ieee_id) + bytes(manuf_name.encode("utf-8"))
+        redis_client.lpush(REDIS_DEVICE_NAME, dev_name)
+
         dev_join = int(device_key).to_bytes(1, "big")
         # dev_join_dict = {"lbdevice_join": [int.from_bytes(device_key, "big")]} # results in 49 for b"1"
         for dev_attribute in dev_attributes:
@@ -372,6 +400,8 @@ def parse_compressed_command(command) -> int:
     if debug_print:
         print("Action: ", action_bytes(action_byte))
 
+ 
+
     match action_byte:
         case action_bytes.ADD_FLOW:
 
@@ -384,6 +414,10 @@ def parse_compressed_command(command) -> int:
 
             err = add_flow(flow_id)
 
+            current_flow = seek_flow(flow_id)
+
+            current_flow.raw_commands.append(command)
+
             print(err)
 
         case action_bytes.ENABLE_FLOW:
@@ -394,6 +428,8 @@ def parse_compressed_command(command) -> int:
             flow_id = command[command_byte_structures["enable_flow"]["flow_id"]]
 
             current_flow = seek_flow(flow_id)
+
+            current_flow.raw_commands.append(command)
 
             if current_flow == None:
                 return error_messages.FLOW_NOT_FOUND
@@ -410,6 +446,8 @@ def parse_compressed_command(command) -> int:
             flow_id = command[command_byte_structures["disable_flow"]["flow_id"]]
 
             current_flow = seek_flow(flow_id)
+
+            current_flow.raw_commands.append(command)
 
             if current_flow == None:
                 return error_messages.FLOW_NOT_FOUND
@@ -446,6 +484,8 @@ def parse_compressed_command(command) -> int:
 
             if current_flow == None:
                 return error_messages.FLOW_NOT_FOUND
+            
+            current_flow.raw_commands.append(command)
 
             flow_filename = "lb_flow" + str(flow_id) + ".json"
 
@@ -471,6 +511,8 @@ def parse_compressed_command(command) -> int:
             flow_id = command[command_byte_structures["upload_flow"]["flow_id"]]
 
             current_flow = seek_flow(flow_id)
+
+            current_flow.raw_commands.append(command)
 
             if current_flow != None:
                 current_flow.nodered_id = template_loader.upload_flow_to_nodered(
@@ -593,6 +635,21 @@ def parse_compressed_command(command) -> int:
             )
 
             backup_flows()
+
+            return err
+
+        case action_bytes.REMOVE_NODE:
+            if len(command) is not len(command_byte_structures["remove_node"]):
+                return error_messages.COMMAND_MALFORMED
+
+            flow_id = command[command_byte_structures["remove_node"]["flow_id"]]
+            node_id = command[command_byte_structures["remove_node"]["node_id"]]
+
+            current_flow = seek_flow(flow_id)
+
+            err = remove_node(flow_id, node_id)
+
+            current_flow.raw_commands.append(command)
 
             return err
 
