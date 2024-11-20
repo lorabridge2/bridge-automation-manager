@@ -172,7 +172,6 @@ def restore_flows():
         print(f"An unexpected error occurred: {e}")
 
 
-
 def seek_flow(_flow_id) -> LBflow:
     for flow in flows:
         if flow.id == _flow_id:
@@ -256,7 +255,6 @@ def remove_node(flow_id, node_id) -> int:
             node.wires.remove(node_id)
 
     return error_messages.NO_ERRORS
-
 
 
 # TODO: Get output nodered id
@@ -345,11 +343,6 @@ def parameter_update(flow_id, node_id, parameter_id, num_bytes, parameter_type, 
 # TODO: Before actual deletion, traverse all connections (wires) in flows nodes and remove all the output connections to the node being deleted
 
 
-
-
-
-
-
 def pull_device_update():
 
     device_keys = redis_client.execute_command("HKEYS lorabridge:device:registry:id")
@@ -402,8 +395,6 @@ def parse_compressed_command(command) -> int:
 
     if debug_print:
         print("Action: ", action_bytes(action_byte))
-
- 
 
     match action_byte:
         case action_bytes.ADD_FLOW:
@@ -487,7 +478,7 @@ def parse_compressed_command(command) -> int:
 
             if current_flow == None:
                 return error_messages.FLOW_NOT_FOUND
-            
+
             current_flow.raw_commands.append(command)
 
             flow_filename = "lb_flow" + str(flow_id) + ".json"
@@ -496,13 +487,16 @@ def parse_compressed_command(command) -> int:
 
             flow_digest = current_flow.hash()
 
-            flow_digest_dict = {"lbflow_digest": bytes([flow_id]) + flow_digest}
+            # flow_digest_dict = {"lbflow_digest": bytes([flow_id]) + flow_digest}
 
+            payload = bytes([flow_id]) + flow_digest
+
+            print(bytes([flow_id]))
             print("Digest: ", flow_digest)
 
             # Push flow_id + digest (64 bits -> 8xhex) to a redis queue
 
-            redis_client.lpush(REDIS_FLOW_DIGESTS, json.dumps(flow_digest_dict))
+            redis_client.lpush(REDIS_FLOW_DIGESTS, payload)
 
             backup_flows()
 
