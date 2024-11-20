@@ -12,5 +12,8 @@ COPY --from=build /usr/lib/libstdc++* /usr/lib/
 WORKDIR /home/decompression
 COPY . .
 
+RUN mkdir /home/decompression/backup && chown -R 1337:1337 /home/decompression/backup
+VOLUME /home/decompression/backup
+
 USER 1337:1337
 ENTRYPOINT [ "python3", "decompression.py"]
