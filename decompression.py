@@ -177,7 +177,7 @@ def restore_flow(flow_filename) -> LBflow | None:
 
 def restore_flows():
     for flow_file in glob.glob("backup/*.dat"):
-        flows.append(restore_flow(flow_file))
+        flows.extend(restore_flow(flow_file))
 
 
 def seek_flow(_flow_id) -> LBflow:
