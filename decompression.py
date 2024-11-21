@@ -181,6 +181,7 @@ def restore_flows():
 
 
 def seek_flow(_flow_id) -> LBflow:
+    print(flows)
     for flow in flows:
         if flow.id == _flow_id:
             return flow
