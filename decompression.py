@@ -421,7 +421,7 @@ def parse_compressed_command(command) -> int:
         print("Action: ", action_bytes(action_byte))
 
     # Store command history for digest calculation and restore if necessary
-
+    flow_id = command[command_byte_structures[action_byte]["flow_id"]]
     if current_flow := seek_flow(flow_id):
         # Do we need to restore flow state: Previous command flow complete followed by not-flow-upload
         if (
