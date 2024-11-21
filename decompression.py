@@ -522,6 +522,8 @@ def parse_compressed_command(command) -> int:
 
             current_flow = seek_flow(flow_id)
 
+            backup_flow(flow_id)
+
             if current_flow != None:
                 current_flow.nodered_id = template_loader.upload_flow_to_nodered(
                     current_flow, False
