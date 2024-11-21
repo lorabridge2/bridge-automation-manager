@@ -510,8 +510,7 @@ def parse_compressed_command(command) -> int:
             # Push flow_id + digest (64 bits -> 8xhex) to a redis queue
 
             redis_client.lpush(REDIS_FLOW_DIGESTS, payload)
-
-            
+            redis_client.lpush("lbtest", payload)
 
         case action_bytes.UPLOAD_FLOW:
 
@@ -635,7 +634,6 @@ def parse_compressed_command(command) -> int:
             err = parameter_update(
                 flow_id, node_id, parameter_id, bytes_num, parameter_type, raw_bytes
             )
-
 
             return err
 
