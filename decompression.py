@@ -556,12 +556,12 @@ def parse_compressed_command(command) -> int:
                 return error_messages.FLOW_NOT_FOUND
 
         case action_bytes.ADD_NODE:
-            if len(command) is not len(command_byte_structures[action_bytes.ADD_NOD]):
+            if len(command) is not len(command_byte_structures[action_bytes.ADD_NODE]):
                 return error_messages.COMMAND_MALFORMED
 
-            flow_id = command[command_byte_structures[action_bytes.ADD_NOD]["flow_id"]]
-            node_id = command[command_byte_structures[action_bytes.ADD_NOD]["node_id"]]
-            node_type = command[command_byte_structures[action_bytes.ADD_NOD]["node_type"]]
+            flow_id = command[command_byte_structures[action_bytes.ADD_NODE]["flow_id"]]
+            node_id = command[command_byte_structures[action_bytes.ADD_NODE]["node_id"]]
+            node_type = command[command_byte_structures[action_bytes.ADD_NODE]["node_type"]]
 
             current_flow = seek_flow(flow_id)
 
