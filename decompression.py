@@ -194,7 +194,7 @@ def restore_flow(flow_filename) -> LBflow | None:
 
 def restore_flows():
     for flow_file in glob.glob("backup/*.dat"):
-        if flow:=restore_flow(flow_file):
+        if flow := restore_flow(flow_file):
             flows.extend(flow)
 
 
@@ -430,7 +430,11 @@ def parse_compressed_command(command) -> int:
             and action_byte != action_bytes.UPLOAD_FLOW
         ):
             flow_idx = flows.index(current_flow)
-            flows[flow_idx] = restore_flow(flow_id)
+            if flow := restore_flow(flow_id):
+                flows[flow_idx] = flow
+            else:
+                # del flows[flow_idx]
+                flows[flow_idx] = LBflow(flow_id)
 
     # if action_byte in flow_modifier_commands:
     #     flow_id = command[command_byte_structures[action_byte]["flow_id"]]
