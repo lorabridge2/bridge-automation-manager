@@ -56,7 +56,21 @@ class action_bytes(IntEnum):
     UPLOAD_FLOW = 12
     GET_DEVICES = 13
 
-flow_modifier_commands = [action_bytes.REMOVE_NODE, action_bytes.ADD_NODE, action_bytes. ADD_DEVICE, action_bytes.PARAMETER_UPDATE, action_bytes.CONNECT_NODE, action_bytes.DISCONNECT_NODE, action_bytes.ENABLE_FLOW, action_bytes.DISABLE_FLOW, action_bytes.ADD_FLOW, action_bytes.FLOW_COMPLETE, action_bytes. UPLOAD_FLOW]
+
+flow_modifier_commands = [
+    action_bytes.REMOVE_NODE,
+    action_bytes.ADD_NODE,
+    action_bytes.ADD_DEVICE,
+    action_bytes.PARAMETER_UPDATE,
+    action_bytes.CONNECT_NODE,
+    action_bytes.DISCONNECT_NODE,
+    action_bytes.ENABLE_FLOW,
+    action_bytes.DISABLE_FLOW,
+    action_bytes.ADD_FLOW,
+    action_bytes.FLOW_COMPLETE,
+    action_bytes.UPLOAD_FLOW,
+]
+
 
 class parameter_data_types(IntEnum):
     BOOLEAN = 0
@@ -104,7 +118,7 @@ command_byte_structures = {
     action_bytes.REMOVE_FLOW: {"action_byte": 0, "flow_id": 1},
     action_bytes.UPLOAD_FLOW: {"action_byte": 0, "flow_id": 1},
     action_bytes.ADD_NODE: {"action_byte": 0, "flow_id": 1, "node_id": 2, "node_type": 3},
-    action_bytes.REMOVE_NODE: {"action_byte":0, "flow_id": 1, "node_id": 2},
+    action_bytes.REMOVE_NODE: {"action_byte": 0, "flow_id": 1, "node_id": 2},
     action_bytes.ADD_DEVICE: {
         "action_byte": 0,
         "flow_id": 1,
@@ -156,14 +170,16 @@ def delete_flow(flow_id) -> int:
     else:
         flows.remove(seek_flow(flow_id))
 
+
 def backup_flow(flow_id):
     _flow = seek_flow(flow_id)
-    flow_file = open('backup/flow'+str(flow_id)+'backup.dat', 'wb')
+    flow_file = open("backup/flow" + str(flow_id) + "backup.dat", "wb")
     pickle.dump(flows, flow_file)
+
 
 def restore_flow(flow_filename) -> LBflow | None:
     try:
-        with open(flow_filename, 'rb') as file:
+        with open(flow_filename, "rb") as file:
             flow = pickle.load(file)
             print("Flow data restored from backup file.")
             return flow
@@ -174,6 +190,7 @@ def restore_flow(flow_filename) -> LBflow | None:
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
     return None
+
 
 def restore_flows():
     for flow_file in glob.glob("backup/*.dat"):
@@ -246,20 +263,20 @@ def add_device(flow_id, node_id, node_type, lb_device, lb_attribute) -> int:
 
 
 def remove_node(flow_id, node_id) -> int:
-  
+
     _flow = seek_flow(flow_id)
 
     if _flow == None:
         return error_messages.FLOW_NOT_FOUND
-    
+
     _node = seek_node(flow_id, node_id)
 
     if _node == None:
         return error_messages.NODE_NOT_FOUND
-    
+
     _flow.nodes.remove(_node)
 
-    for node in _flow.nodes:        
+    for node in _flow.nodes:
         if node_id in node.wires:
             node.wires.remove(node_id)
 
@@ -356,8 +373,6 @@ def pull_device_update():
 
     device_keys = redis_client.execute_command("HKEYS lorabridge:device:registry:id")
 
-
-
     for device_key in device_keys:
         ieee_id = redis_client.execute_command(
             "HGET lorabridge:device:registry:id " + device_key.decode("utf-8")
@@ -374,8 +389,8 @@ def pull_device_update():
             manuf_name = "unknown".encode("utf-8")
 
         dev_attributes = [item.decode() for item in dev_attributes]
-        
-        dev_name = int(device_key).to_bytes(1,"big") + ieee_id + manuf_name
+
+        dev_name = int(device_key).to_bytes(1, "big") + ieee_id + manuf_name
         redis_client.lpush(REDIS_DEVICE_NAME, dev_name)
 
         dev_join = int(device_key).to_bytes(1, "big")
@@ -407,19 +422,28 @@ def parse_compressed_command(command) -> int:
 
     # Store command history for digest calculation and restore if necessary
 
-    if action_byte in flow_modifier_commands:
-        flow_id = command[command_byte_structures[action_byte]["flow_id"]]
-        current_flow = seek_flow(flow_id)
-
+    if current_flow := seek_flow(flow_id):
         # Do we need to restore flow state: Previous command flow complete followed by not-flow-upload
-        if current_flow.raw_commands[-1][0] == action_bytes.FLOW_COMPLETE and action_byte != action_bytes.UPLOAD_FLOW:
+        if (
+            current_flow.raw_commands[-1][0] == action_bytes.FLOW_COMPLETE
+            and action_byte != action_bytes.UPLOAD_FLOW
+        ):
             flow_idx = flows.index(current_flow)
             flows[flow_idx] = restore_flow(flow_id)
 
-        current_flow = seek_flow(flow_id)
+    # if action_byte in flow_modifier_commands:
+    #     flow_id = command[command_byte_structures[action_byte]["flow_id"]]
+    #     current_flow = seek_flow(flow_id)
 
-        current_flow.raw_commands.append(command)
+    #     # Do we need to restore flow state: Previous command flow complete followed by not-flow-upload
+    #     if current_flow.raw_commands[-1][0] == action_bytes.FLOW_COMPLETE and action_byte != action_bytes.UPLOAD_FLOW:
+    #         flow_idx = flows.index(current_flow)
+    #         flows[flow_idx] = restore_flow(flow_id)
 
+    #     current_flow = seek_flow(flow_id)
+
+    #     current_flow.raw_commands.append(command)
+    err = error_messages.NO_ERRORS
     match action_byte:
         case action_bytes.ADD_FLOW:
 
@@ -551,7 +575,7 @@ def parse_compressed_command(command) -> int:
 
             err = add_node(flow_id, node_id, node_type)
             print(err)
-            return err
+            # return err
 
         case action_bytes.ADD_DEVICE:
 
@@ -575,7 +599,7 @@ def parse_compressed_command(command) -> int:
                 return error_messages.DUPLICATE_FOUND
 
             err = add_device(flow_id, node_id, node_type, lb_device, lb_attribute)
-            return err
+            # return err
 
         case action_bytes.CONNECT_NODE:
             if len(command) is not len(command_byte_structures[action_bytes.CONNECT_NODE]):
@@ -603,7 +627,7 @@ def parse_compressed_command(command) -> int:
             print(err)
             print("output node", output_node)
             print("input node", input_node)
-            return err
+            # return err
 
         case action_bytes.PARAMETER_UPDATE:
             # Variable length command..
@@ -617,7 +641,9 @@ def parse_compressed_command(command) -> int:
 
             flow_id = command[command_byte_structures[action_bytes.PARAMETER_UPDATE]["flow_id"]]
             node_id = command[command_byte_structures[action_bytes.PARAMETER_UPDATE]["node_id"]]
-            parameter_id = command[command_byte_structures[action_bytes.PARAMETER_UPDATE]["parameter_id"]]
+            parameter_id = command[
+                command_byte_structures[action_bytes.PARAMETER_UPDATE]["parameter_id"]
+            ]
             bytes_num = command[command_byte_structures[action_bytes.PARAMETER_UPDATE]["bytes"]]
             parameter_type = command[command_byte_structures[action_bytes.PARAMETER_UPDATE]["type"]]
             raw_bytes = command[command_byte_structures[action_bytes.PARAMETER_UPDATE]["content"] :]
@@ -636,7 +662,7 @@ def parse_compressed_command(command) -> int:
                 flow_id, node_id, parameter_id, bytes_num, parameter_type, raw_bytes
             )
 
-            return err
+            # return err
 
         case action_bytes.REMOVE_NODE:
             if len(command) is not len(command_byte_structures[action_bytes.REMOVE_NODE]):
@@ -649,12 +675,17 @@ def parse_compressed_command(command) -> int:
 
             err = remove_node(flow_id, node_id)
 
-            return err
+            # return err
 
         case action_bytes.GET_DEVICES:
             pull_device_update()
 
-    return error_messages.NO_ERRORS
+    if action_byte in flow_modifier_commands:
+        flow_id = command[command_byte_structures[action_byte]["flow_id"]]
+        current_flow = seek_flow(flow_id)
+        current_flow.raw_commands.append(command)
+
+    return err
     # "connect_node": {"action_byte": 0, "flow_id": 1, "output_node": 2,"output":3, "input_node": 4, "input": 5}
 
 
