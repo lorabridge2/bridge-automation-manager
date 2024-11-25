@@ -176,15 +176,19 @@ def backup_flow(flow_id):
     flow_file = open("backup/flow" + str(flow_id) + "backup.dat", "wb")
     pickle.dump(flows, flow_file)
 
+def remove_backup_flow(flow_id):
+    flow_file = open("backup/flow" + str(flow_id) + "backup.dat", "wb")
+    pickle.dump(None, flow_file)
 
 def restore_flow(flow_filename) -> LBflow | None:
     try:
         with open(flow_filename, "rb") as file:
             flow = pickle.load(file)
-            print("Flow data restored from backup file.")
+            if flow != None:
+                print("Flow data restored from backup file.")
             return flow
     except FileNotFoundError:
-        print(f"Could not restore flows: The file flowbackup.dat was not found.")
+        print(f"Could not restore flows: The file " + flow_filename + " was not found.")
     except pickle.UnpicklingError:
         print("Error: The flow backup file is not a valid pickle file.")
     except Exception as e:
@@ -506,6 +510,7 @@ def parse_compressed_command(command) -> int:
 
             if current_flow != None:
                 template_loader.delete_flow_from_nodered(current_flow)
+                remove_backup_flow(flow_id)
                 delete_flow(flow_id)
             else:
                 return error_messages.FLOW_NOT_FOUND
