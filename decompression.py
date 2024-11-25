@@ -176,9 +176,11 @@ def backup_flow(flow_id):
     flow_file = open("backup/flow" + str(flow_id) + "backup.dat", "wb")
     pickle.dump(flows, flow_file)
 
+
 def remove_backup_flow(flow_id):
     flow_file = open("backup/flow" + str(flow_id) + "backup.dat", "wb")
     pickle.dump(None, flow_file)
+
 
 def restore_flow(flow_filename) -> LBflow | None:
     try:
@@ -529,6 +531,8 @@ def parse_compressed_command(command) -> int:
             if current_flow == None:
                 return error_messages.FLOW_NOT_FOUND
 
+            current_flow.raw_commands.append(command)
+
             flow_filename = "lb_flow" + str(flow_id) + ".json"
 
             template_loader.compose_nodered_flow_to_json(current_flow, flow_filename)
@@ -692,7 +696,7 @@ def parse_compressed_command(command) -> int:
         case action_bytes.GET_DEVICES:
             pull_device_update()
 
-    if action_byte in flow_modifier_commands:
+    if action_byte in flow_modifier_commands and action_byte != action_bytes.FLOW_COMPLETE:
         flow_id = command[command_byte_structures[action_byte]["flow_id"]]
         current_flow = seek_flow(flow_id)
         current_flow.raw_commands.append(command)
