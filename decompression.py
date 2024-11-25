@@ -564,9 +564,15 @@ def parse_compressed_command(command) -> int:
 
             backup_flow(flow_id)
 
+            update = False
+            for cmd in current_flow.raw_commands:
+                if cmd[0] == action_bytes.UPLOAD_FLOW:
+                    update = True
+                    break
+
             if current_flow != None:
                 current_flow.nodered_id = template_loader.upload_flow_to_nodered(
-                    current_flow, False
+                    current_flow, update
                 )
             else:
                 return error_messages.FLOW_NOT_FOUND
