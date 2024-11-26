@@ -490,6 +490,8 @@ def parse_compressed_command(command) -> int:
 
             template_loader.upload_flow_to_nodered(current_flow, True)
 
+            backup_flow(flow_id)
+
         case action_bytes.DISABLE_FLOW:
 
             if len(command) is not len(command_byte_structures[action_bytes.DISABLE_FLOW]):
