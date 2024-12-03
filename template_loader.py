@@ -4,6 +4,7 @@ import json
 import redis
 import nodered_id_gen
 import LBflow
+import copy
 import paho.mqtt.subscribe as subscribe
 from error_messages import error_messages
 import device_classes
@@ -69,7 +70,7 @@ def compose_nodered_flow_to_json(flow: LBflow, output_file: str) -> None:
 
     for node in flow.nodes:
 
-        nodered_template_new = dict(node.nodered_template)
+        nodered_template_new = copy.deepcopy(node.nodered_template)
 
         for template_nodes in nodered_template_new[1:]:
             template_nodes["z"] = header["id"]
