@@ -135,6 +135,12 @@ command_byte_structures = {
         "input_node": 4,
         "input": 5,
     },
+    action_bytes.DISCONNECT_NODE: {
+        "action_byte": 0,
+        "flow_id": 1,
+        "output_node": 2,
+        "output": 3
+    },
     action_bytes.PARAMETER_UPDATE: {
         "action_byte": 0,
         "flow_id": 1,
@@ -659,6 +665,25 @@ def parse_compressed_command(command) -> int:
             print("output node", output_node)
             print("input node", input_node)
             # return err
+        
+        case action_bytes.DISCONNECT_NODE:
+            if len(command) is not len(command_byte_structures[action_bytes.DISCONNECT_NODE]):
+                return error_messages.COMMAND_MALFORMED
+
+            flow_id = command[command_byte_structures[action_bytes.DISCONNECT_NODE]["flow_id"]]
+            output_node = command[command_byte_structures[action_bytes.DISCONNECT_NODE]["output_node"]]
+            output = command[command_byte_structures[action_bytes.DISCONNECT_NODE]["output"]]
+           
+            current_flow = seek_flow(flow_id)
+            if current_flow == None:
+                return error_messages.FLOW_NOT_FOUND
+
+            _output_node = seek_node(flow_id, output_node)
+            if _output_node == None:
+                return error_messages.NODE_NOT_FOUND
+
+            err = disconnect_nodes(flow_id, output_node, output)
+            print(err)
 
         case action_bytes.PARAMETER_UPDATE:
             # Variable length command..
