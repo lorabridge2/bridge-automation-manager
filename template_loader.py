@@ -69,7 +69,9 @@ def compose_nodered_flow_to_json(flow: LBflow, output_file: str) -> None:
 
     for node in flow.nodes:
 
-        for template_nodes in node.nodered_template[1:]:
+        nodered_template_new = dict(node.nodered_template)
+
+        for template_nodes in nodered_template_new[1:]:
             template_nodes["z"] = header["id"]
 
             if (
@@ -81,10 +83,10 @@ def compose_nodered_flow_to_json(flow: LBflow, output_file: str) -> None:
             if (
                 template_nodes["type"]
                 == "mqtt in"
-                # and node.nodered_template[0]["type"] == "lb_mqtt_input_numeric"
-                # or node.nodered_template[0]["type"] == "lb_mqtt_input_binary"
+                # and nodered_template_new[0]["type"] == "lb_mqtt_input_numeric"
+                # or nodered_template_new[0]["type"] == "lb_mqtt_input_binary"
             ):
-                node.nodered_template[0]["parameters"][0]["current_value"] = (
+                nodered_template_new[0]["parameters"][0]["current_value"] = (
                     device_classes.DEVICE_CLASSES[node.device_attribute]
                 )
 
@@ -92,67 +94,67 @@ def compose_nodered_flow_to_json(flow: LBflow, output_file: str) -> None:
                     node.device_id
                 )
 
-            if node.nodered_template[0]["type"] == "lb_mqtt_input_binary":
+            if nodered_template_new[0]["type"] == "lb_mqtt_input_binary":
                 boolean_attributes = get_boolean_definitions_ieee_id(
                     get_device_ieee_id(node.device_id),
                     device_classes.DEVICE_CLASSES[node.device_attribute],
                 )
 
                 if isinstance(boolean_attributes["value_on"], str):
-                    node.nodered_template[0]["parameters"][1]["current_value"] = (
+                    nodered_template_new[0]["parameters"][1]["current_value"] = (
                         '"' + boolean_attributes["value_on"] + '"'
                     )
-                    node.nodered_template[0]["parameters"][2]["current_value"] = (
+                    nodered_template_new[0]["parameters"][2]["current_value"] = (
                         '"' + boolean_attributes["value_off"] + '"'
                     )
                 if isinstance(boolean_attributes["value_on"], bool):
-                    node.nodered_template[0]["parameters"][1]["current_value"] = str(
+                    nodered_template_new[0]["parameters"][1]["current_value"] = str(
                         boolean_attributes["value_on"]
                     ).lower()
-                    node.nodered_template[0]["parameters"][2]["current_value"] = str(
+                    nodered_template_new[0]["parameters"][2]["current_value"] = str(
                         boolean_attributes["value_off"]
                     ).lower()
 
-            if node.nodered_template[0]["type"] == "lb_mqtt_output_binary":
+            if nodered_template_new[0]["type"] == "lb_mqtt_output_binary":
                 boolean_attributes = get_boolean_definitions_ieee_id(
                     get_device_ieee_id(node.device_id),
                     device_classes.DEVICE_CLASSES[node.device_attribute],
                 )
 
                 if isinstance(boolean_attributes["value_on"], str):
-                    node.nodered_template[0]["parameters"][1]["current_value"] = (
+                    nodered_template_new[0]["parameters"][1]["current_value"] = (
                         '\\"' + boolean_attributes["value_on"] + '\\"'
                     )
-                    node.nodered_template[0]["parameters"][2]["current_value"] = (
+                    nodered_template_new[0]["parameters"][2]["current_value"] = (
                         '\\"' + boolean_attributes["value_off"] + '\\"'
                     )
-                    node.nodered_template[0]["parameters"][4]["current_value"] = (
+                    nodered_template_new[0]["parameters"][4]["current_value"] = (
                         '"' + boolean_attributes["value_on"] + '"'
                     )
-                    node.nodered_template[0]["parameters"][5]["current_value"] = (
+                    nodered_template_new[0]["parameters"][5]["current_value"] = (
                         '"' + boolean_attributes["value_off"] + '"'
                     )
                 if isinstance(boolean_attributes["value_on"], bool):
-                    node.nodered_template[0]["parameters"][1]["current_value"] = (
+                    nodered_template_new[0]["parameters"][1]["current_value"] = (
                         '"' + str(boolean_attributes["value_on"]).lower() + '"'
                     )
-                    node.nodered_template[0]["parameters"][2]["current_value"] = (
+                    nodered_template_new[0]["parameters"][2]["current_value"] = (
                         '"' + str(boolean_attributes["value_off"]).lower() + '"'
                     )
-                    node.nodered_template[0]["parameters"][4]["current_value"] = str(
+                    nodered_template_new[0]["parameters"][4]["current_value"] = str(
                         boolean_attributes["value_on"]
                     ).lower()
-                    node.nodered_template[0]["parameters"][5]["current_value"] = str(
+                    nodered_template_new[0]["parameters"][5]["current_value"] = str(
                         boolean_attributes["value_off"]
                     ).lower()
 
             if (
                 template_nodes["type"]
                 == "mqtt out"
-                # and node.nodered_template[0]["type"] == "lb_mqtt_output"
-                # or node.nodered_template[0]["type"] == "lb_mqtt_output_binary"
+                # and nodered_template_new[0]["type"] == "lb_mqtt_output"
+                # or nodered_template_new[0]["type"] == "lb_mqtt_output_binary"
             ):
-                node.nodered_template[0]["parameters"][0]["current_value"] = (
+                nodered_template_new[0]["parameters"][0]["current_value"] = (
                     device_classes.DEVICE_CLASSES[node.device_attribute]
                 )
                 template_nodes["topic"] = (
@@ -161,13 +163,13 @@ def compose_nodered_flow_to_json(flow: LBflow, output_file: str) -> None:
 
             nodered_flow[0]["nodes"].append(template_nodes)
 
-        # nodered_flow.append(node.nodered_template[1:])
+        # nodered_flow.append(nodered_template_new[1:])
 
         # Check for parameters to be updated/initialized
 
-        if "parameters" in node.nodered_template[0]:
-            # print("Updating parameters for ", node.nodered_template[0]["description"])
-            for parameter in node.nodered_template[0]["parameters"]:
+        if "parameters" in nodered_template_new[0]:
+            # print("Updating parameters for ", nodered_template_new[0]["description"])
+            for parameter in nodered_template_new[0]["parameters"]:
 
                 parameter_node_id = parameter["node_id"]
                 parameter_tag = parameter["nametag"]
