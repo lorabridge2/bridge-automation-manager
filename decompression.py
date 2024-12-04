@@ -84,7 +84,6 @@ class node_bytes(IntEnum):
     HYBRID_DEVICE = 2
     BINARY_SENSOR = 3
     NUMERIC_SENSOR = 4
-    ALERT = 5
     LOGIC_AND = 6
     LOGIC_OR = 7
     TIMER_SWITCH = 8
