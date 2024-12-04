@@ -3,23 +3,39 @@
         "description": "Compares numeric or boolean input with a math operation and if condition matches, forwards message payload",
         "id": "notgenerated",
         "type": "lb_value_filter",
-        "inputs": ["f3aa71802c00f8dd"],
-        "outputs": ["f3aa71802c00f8dd"],
-        "input_descriptions": ["filter input"],
-        "output_descriptions": ["filter output"],  
-        "parameters": [   
-                {
-                    "nametag": "lb_user_op",
-                    "current_value": "eq",
-                    "node_id": "f3aa71802c00f8dd",
-                    "nodekey": "func"
-                },     
-                {
-                    "nametag": "lb_user_value",
-                    "current_value": 0,
-                    "node_id": "f3aa71802c00f8dd",
-                    "nodekey": "func"
-                }                 
+        "inputs": [
+            "f3aa71802c00f8dd"
+        ],
+        "outputs": [
+            "f3aa71802c00f8dd"
+        ],
+        "input_descriptions": [
+            "filter input"
+        ],
+        "output_descriptions": [
+            "filter output"
+        ],
+        "parameters": [
+            {
+                "nametag": "lb_user_op",
+                "current_value": "eq",
+                "node_id": "f3aa71802c00f8dd",
+                "nodekey": [
+                    "rules",
+                    0,
+                    "t"
+                ]
+            },
+            {
+                "nametag": "lb_user_value",
+                "current_value": 0,
+                "node_id": "f3aa71802c00f8dd",
+                "nodekey": [
+                    "rules",
+                    0,
+                    "v"
+                ]
+            }
         ]
     },
     {

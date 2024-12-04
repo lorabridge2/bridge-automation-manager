@@ -75,10 +75,7 @@ def compose_nodered_flow_to_json(flow: LBflow, output_file: str) -> None:
         for template_nodes in nodered_template_new[1:]:
             template_nodes["z"] = header["id"]
 
-            if (
-                template_nodes["type"] == "mqtt in"
-                or template_nodes["type"] == "mqtt out"
-            ):
+            if template_nodes["type"] == "mqtt in" or template_nodes["type"] == "mqtt out":
                 template_nodes["broker"] = nodered_mqtt_broker
 
             if (
@@ -91,9 +88,7 @@ def compose_nodered_flow_to_json(flow: LBflow, output_file: str) -> None:
                     device_classes.DEVICE_CLASSES[node.device_attribute]
                 )
 
-                template_nodes["topic"] = "zigbee2mqtt/" + get_device_ieee_id(
-                    node.device_id
-                )
+                template_nodes["topic"] = "zigbee2mqtt/" + get_device_ieee_id(node.device_id)
 
             if nodered_template_new[0]["type"] == "lb_mqtt_input_binary":
                 boolean_attributes = get_boolean_definitions_ieee_id(
@@ -175,6 +170,10 @@ def compose_nodered_flow_to_json(flow: LBflow, output_file: str) -> None:
                 parameter_node_id = parameter["node_id"]
                 parameter_tag = parameter["nametag"]
                 parameter_nodekey = parameter["nodekey"]
+                if type(parameter_nodekey) not in [list,str]:
+                    raise ValueError("nodekey not a valid type in template")
+                if type(parameter_nodekey) == str:
+                    parameter_nodekey = [parameter_nodekey]
                 parameter_value = parameter["current_value"]
 
                 for nodered_node in nodered_flow[0]["nodes"]:
@@ -183,20 +182,21 @@ def compose_nodered_flow_to_json(flow: LBflow, output_file: str) -> None:
                         # If parametertag -is- the value, then we substitute the value itself
 
                         # TODO: sanity check for type violations (corrupted template)
+                        last = nodered_node
+                        for elem in parameter_nodekey[:-1]:
+                            last = last[elem]
 
-                        if type(nodered_node[parameter_nodekey]) == str:
-                            if nodered_node[parameter_nodekey] == parameter_tag:
-                                nodered_node[parameter_nodekey] = parameter_value
+                        if type(last[parameter_nodekey[-1]]) == str:
+                            if last[parameter_nodekey[-1]] == parameter_tag:
+                                last[parameter_nodekey[-1]] = parameter_value
                             else:
-                                nodered_node[parameter_nodekey] = nodered_node[
-                                    parameter_nodekey
-                                ].replace(parameter_tag, str(parameter_value))
+                                last[parameter_nodekey[-1]] = last[parameter_nodekey[-1]].replace(parameter_tag, str(parameter_value))
 
     flow.nodered_flow_dict = nodered_flow[0]
 
-    #nodered_flow_json = json.dumps(nodered_flow[0], indent=4)
+    # nodered_flow_json = json.dumps(nodered_flow[0], indent=4)
 
-    #with open(output_file, "w") as json_file:
+    # with open(output_file, "w") as json_file:
     #    json_file.write(nodered_flow_json)
 
 
@@ -247,7 +247,6 @@ def upload_flow_to_nodered(flow: LBflow, update: bool):
         method=selected_method,
     )
 
-    
     resp = request.urlopen(req)
 
     flow_resp_raw = resp.read()
@@ -320,9 +319,7 @@ def get_device_ieee_id(lb_id):
 
 def get_boolean_definitions_ieee_id(ieee_id, attribute):
 
-    m = subscribe.simple(
-        "zigbee2mqtt/bridge/devices", hostname=MQTT_HOST, port=MQTT_PORT
-    )
+    m = subscribe.simple("zigbee2mqtt/bridge/devices", hostname=MQTT_HOST, port=MQTT_PORT)
 
     raw_payload = m.payload
     received_items = json.loads(raw_payload)
@@ -353,10 +350,7 @@ def get_boolean_definitions_ieee_id(ieee_id, attribute):
                                     "value_off": exposed_attributes["value_off"],
                                 }
                         # Switch
-                        if (
-                            "type" in exposed_attributes
-                            and "features" in exposed_attributes
-                        ):
+                        if "type" in exposed_attributes and "features" in exposed_attributes:
                             if exposed_attributes["type"] == "switch":
                                 for exposed_features in exposed_attributes["features"]:
                                     if (
@@ -367,11 +361,7 @@ def get_boolean_definitions_ieee_id(ieee_id, attribute):
                                     ):
                                         if attribute in exposed_features["property"]:
                                             return {
-                                                "value_on": exposed_features[
-                                                    "value_on"
-                                                ],
-                                                "value_off": exposed_features[
-                                                    "value_off"
-                                                ],
+                                                "value_on": exposed_features["value_on"],
+                                                "value_off": exposed_features["value_off"],
                                             }
     return {}
