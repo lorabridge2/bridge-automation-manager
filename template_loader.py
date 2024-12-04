@@ -58,7 +58,7 @@ def compose_nodered_flow_to_json(flow: LBflow, output_file: str) -> None:
     header = {
         "id": nodered_id_gen.generate_nodered_id(),
         "type": "tab",
-        "label": "lorabridge flow",
+        "label": "lorabridge flow " + str(flow.id),
         "disabled": True,
         "info": "True heros drink matcha.",
         "env": [],
@@ -170,7 +170,7 @@ def compose_nodered_flow_to_json(flow: LBflow, output_file: str) -> None:
                 parameter_node_id = parameter["node_id"]
                 parameter_tag = parameter["nametag"]
                 parameter_nodekey = parameter["nodekey"]
-                if type(parameter_nodekey) not in [list,str]:
+                if type(parameter_nodekey) not in [list, str]:
                     raise ValueError("nodekey not a valid type in template")
                 if type(parameter_nodekey) == str:
                     parameter_nodekey = [parameter_nodekey]
@@ -190,7 +190,9 @@ def compose_nodered_flow_to_json(flow: LBflow, output_file: str) -> None:
                             if last[parameter_nodekey[-1]] == parameter_tag:
                                 last[parameter_nodekey[-1]] = parameter_value
                             else:
-                                last[parameter_nodekey[-1]] = last[parameter_nodekey[-1]].replace(parameter_tag, str(parameter_value))
+                                last[parameter_nodekey[-1]] = last[parameter_nodekey[-1]].replace(
+                                    parameter_tag, str(parameter_value)
+                                )
 
     flow.nodered_flow_dict = nodered_flow[0]
 
