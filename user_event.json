@@ -21,7 +21,7 @@
         "type": "function",
         "z": "3e2a724c823cfe47",
         "name": "function 5",
-        "func": "msg.payload = {\"user_event\": \"lb_user_message\"}\nreturn msg;",
+        "func": "msg = {\"payload\": \"lb_user_message\"}\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
