@@ -221,7 +221,6 @@ def delete_flow_from_nodered(flow: LBflow):
         resp = request.urlopen(req)
     except error.HTTPError as e:
         print("Nodered API request returned HTTP error: ", e.code)
-        exit(0)
     except error.URLError as e:
         print("Nodered API request returned URL error: ", e.reason)
     else:
