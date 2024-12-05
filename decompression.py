@@ -212,7 +212,6 @@ def restore_flows():
 
 
 def seek_flow(_flow_id) -> LBflow:
-    print(flows)
     for flow in flows:
         if flow.id == _flow_id:
             return flow
@@ -557,7 +556,6 @@ def parse_compressed_command(command) -> int:
 
             payload = bytes([flow_id]) + flow_digest
 
-            print(current_flow.raw_commands)
             print(repr(current_flow.raw_commands))
             print(bytes([flow_id]))
             print("Digest: ", flow_digest)
