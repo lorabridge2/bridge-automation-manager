@@ -136,12 +136,7 @@ command_byte_structures = {
         "input_node": 4,
         "input": 5,
     },
-    action_bytes.DISCONNECT_NODE: {
-        "action_byte": 0,
-        "flow_id": 1,
-        "output_node": 2,
-        "output": 3
-    },
+    action_bytes.DISCONNECT_NODE: {"action_byte": 0, "flow_id": 1, "output_node": 2, "output": 3},
     action_bytes.PARAMETER_UPDATE: {
         "action_byte": 0,
         "flow_id": 1,
@@ -432,26 +427,26 @@ def parse_compressed_command(command) -> int:
 
     if debug_print:
         print("Action: ", action_bytes(action_byte))
-
-    # Store command history for digest calculation and restore if necessary
-    flow_id = command[command_byte_structures[action_byte]["flow_id"]]
-    if current_flow := seek_flow(flow_id):
-        # Do we need to restore flow state: Previous command flow complete followed by not-flow-upload
-        if (
-            current_flow.raw_commands[-1][0] == action_bytes.FLOW_COMPLETE
-            and action_byte != action_bytes.UPLOAD_FLOW
-        ):
-            flow_idx = flows.index(current_flow)
-            if flow := restore_flow(flow_id):
-                flows[flow_idx] = flow
-            else:
-                # del flows[flow_idx]
-                flows[flow_idx] = LBflow(flow_id)
-
-    if action_byte in flow_modifier_commands and action_byte != action_bytes.ADD_FLOW:
+    if action_byte in flow_modifier_commands:
+        # Store command history for digest calculation and restore if necessary
         flow_id = command[command_byte_structures[action_byte]["flow_id"]]
-        current_flow = seek_flow(flow_id)
-        current_flow.raw_commands.append(command)
+        if current_flow := seek_flow(flow_id):
+            # Do we need to restore flow state: Previous command flow complete followed by not-flow-upload
+            if (
+                current_flow.raw_commands[-1][0] == action_bytes.FLOW_COMPLETE
+                and action_byte != action_bytes.UPLOAD_FLOW
+            ):
+                flow_idx = flows.index(current_flow)
+                if flow := restore_flow(flow_id):
+                    flows[flow_idx] = flow
+                else:
+                    # del flows[flow_idx]
+                    flows[flow_idx] = LBflow(flow_id)
+
+        if action_byte != action_bytes.ADD_FLOW:
+            flow_id = command[command_byte_structures[action_byte]["flow_id"]]
+            current_flow = seek_flow(flow_id)
+            current_flow.raw_commands.append(command)
 
     # if action_byte in flow_modifier_commands:
     #     flow_id = command[command_byte_structures[action_byte]["flow_id"]]
@@ -664,15 +659,17 @@ def parse_compressed_command(command) -> int:
             print("output node", output_node)
             print("input node", input_node)
             # return err
-        
+
         case action_bytes.DISCONNECT_NODE:
             if len(command) is not len(command_byte_structures[action_bytes.DISCONNECT_NODE]):
                 return error_messages.COMMAND_MALFORMED
 
             flow_id = command[command_byte_structures[action_bytes.DISCONNECT_NODE]["flow_id"]]
-            output_node = command[command_byte_structures[action_bytes.DISCONNECT_NODE]["output_node"]]
+            output_node = command[
+                command_byte_structures[action_bytes.DISCONNECT_NODE]["output_node"]
+            ]
             output = command[command_byte_structures[action_bytes.DISCONNECT_NODE]["output"]]
-           
+
             current_flow = seek_flow(flow_id)
             if current_flow == None:
                 return error_messages.FLOW_NOT_FOUND
