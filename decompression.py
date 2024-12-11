@@ -398,7 +398,7 @@ def pull_device_update():
 
         dev_attributes = [item.decode() for item in dev_attributes]
 
-        dev_name = int(device_key).to_bytes(1, "big") + ieee_id + manuf_name
+        dev_name = int(device_key).to_bytes(1, "big") + int(ieee_id, 16).to_bytes(8, "big") + manuf_name
         redis_client.lpush(REDIS_DEVICE_NAME, dev_name)
 
         dev_join = int(device_key).to_bytes(1, "big")
