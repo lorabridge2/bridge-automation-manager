@@ -8,8 +8,9 @@ import hashlib
 import threading
 import pickle
 import glob
+import msgpack
 
-from enum import IntEnum
+from enum import IntEnum, StrEnum
 from redis_queue_listener import RedisQueueListener
 
 from error_messages import error_messages
@@ -38,6 +39,11 @@ REDIS_DEVICE_NAME = "lorabridge:device:name"
 new_node = LBnode(1, 2)
 
 # TODO: These should not be hard coded, but loaded from a config file (json?)
+
+
+class status_types(IntEnum):
+    TRANSMISSION_COMPLETE: 0
+    TRANSMISSION_FAILED: 1
 
 
 class action_bytes(IntEnum):
@@ -398,7 +404,9 @@ def pull_device_update():
 
         dev_attributes = [item.decode() for item in dev_attributes]
 
-        dev_name = int(device_key).to_bytes(1, "big") + int(ieee_id, 16).to_bytes(8, "big") + manuf_name
+        dev_name = (
+            int(device_key).to_bytes(1, "big") + int(ieee_id, 16).to_bytes(8, "big") + manuf_name
+        )
         redis_client.lpush(REDIS_DEVICE_NAME, dev_name)
 
         dev_join = int(device_key).to_bytes(1, "big")
@@ -485,6 +493,7 @@ def parse_compressed_command(command) -> int:
             current_flow = seek_flow(flow_id)
 
             if current_flow == None:
+                set_status(flow_id, status_types.TRANSMISSION_FAILED)
                 return error_messages.FLOW_NOT_FOUND
 
             current_flow.nodered_flow_dict["disabled"] = False
@@ -492,6 +501,7 @@ def parse_compressed_command(command) -> int:
             template_loader.upload_flow_to_nodered(current_flow, True)
 
             backup_flow(flow_id)
+            set_status(flow_id, status_types.TRANSMISSION_COMPLETE)
 
         case action_bytes.DISABLE_FLOW:
 
@@ -503,11 +513,13 @@ def parse_compressed_command(command) -> int:
             current_flow = seek_flow(flow_id)
 
             if current_flow == None:
+                set_status(flow_id, status_types.TRANSMISSION_FAILED)
                 return error_messages.FLOW_NOT_FOUND
 
             current_flow.nodered_flow_dict["disabled"] = True
 
             template_loader.upload_flow_to_nodered(current_flow, True)
+            set_status(flow_id, status_types.TRANSMISSION_COMPLETE)
 
         case action_bytes.REMOVE_FLOW:
 
@@ -522,7 +534,9 @@ def parse_compressed_command(command) -> int:
                 template_loader.delete_flow_from_nodered(current_flow)
                 remove_backup_flow(flow_id)
                 delete_flow(flow_id)
+                set_status(flow_id, status_types.TRANSMISSION_COMPLETE)
             else:
+                set_status(flow_id, status_types.TRANSMISSION_FAILED)
                 return error_messages.FLOW_NOT_FOUND
 
         case action_bytes.FLOW_COMPLETE:
@@ -558,7 +572,7 @@ def parse_compressed_command(command) -> int:
             # Push flow_id + digest (64 bits -> 8xhex) to a redis queue
 
             redis_client.lpush(REDIS_FLOW_DIGESTS, payload)
-            redis_client.lpush("lbtest", payload)
+            # redis_client.lpush("lbtest", payload)
 
         case action_bytes.UPLOAD_FLOW:
 
@@ -748,6 +762,10 @@ def process_downlink_data(data):
 
     if err_msg != error_messages.NO_ERRORS:
         print("Parsing error: ", err_msg)
+
+
+def set_status(flow_id, type: status_types):
+    redis_client.lpush("lorabridge:events:system", msgpack.dumps({id: flow_id, type: type}))
 
 
 def excepthook(args):

@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 redis = "*"
 paho-mqtt = "*"
+msgpack = "*"
 
 [dev-packages]
 
