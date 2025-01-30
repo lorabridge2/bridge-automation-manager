@@ -42,8 +42,8 @@ new_node = LBnode(1, 2)
 
 
 class status_types(IntEnum):
-    TRANSMISSION_COMPLETE: 0
-    TRANSMISSION_FAILED: 1
+    TRANSMISSION_COMPLETE = 0
+    TRANSMISSION_FAILED = 1
 
 
 class action_bytes(IntEnum):
