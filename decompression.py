@@ -765,7 +765,7 @@ def process_downlink_data(data):
 
 
 def set_status(flow_id, type: status_types):
-    redis_client.lpush("lorabridge:events:system", msgpack.dumps({id: flow_id, type: type}))
+    redis_client.lpush("lorabridge:events:system", msgpack.dumps({"id": flow_id, "type": type}))
 
 
 def excepthook(args):
