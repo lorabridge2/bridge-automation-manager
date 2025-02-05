@@ -86,8 +86,7 @@ class parameter_data_types(IntEnum):
 
 
 class node_bytes(IntEnum):
-    BINARY_DEVICE = 1
-    HYBRID_DEVICE = 2
+    BINARY_DEVICE = 1  
     BINARY_SENSOR = 3
     NUMERIC_SENSOR = 4
     LOGIC_AND = 6
