@@ -244,7 +244,7 @@ def add_node(flow_id, node_id, node_type) -> int:
     new_node.nodered_template = template_loader.load_nodered_template(
         node_template_files_dictionary[node_type]
     )
-    new_node.wires = [-1] * len(new_node.nodered_template[0]["outputs"])
+    new_node.wires = [[]] * len(new_node.nodered_template[0]["outputs"])
 
     _flow.nodes.append(new_node)
 
