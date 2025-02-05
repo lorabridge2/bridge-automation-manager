@@ -267,7 +267,7 @@ def add_device(flow_id, node_id, node_type, lb_device, lb_attribute) -> int:
     new_device.nodered_template = template_loader.load_nodered_template(
         node_template_files_dictionary[node_type]
     )
-    new_device.wires = [-1] * len(new_device.nodered_template[0]["outputs"])
+    new_device.wires = [[]] * len(new_device.nodered_template[0]["outputs"])
     new_device.device_id = lb_device
     new_device.device_attribute = lb_attribute
 
