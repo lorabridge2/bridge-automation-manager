@@ -356,8 +356,10 @@ def get_boolean_definitions_ieee_id(ieee_id, attribute):
                                     "value_off": exposed_attributes["value_off"],
                                 }
                         # Switch
+                        device_types = ["switch", "light"]
+
                         if "type" in exposed_attributes and "features" in exposed_attributes:
-                            if exposed_attributes["type"] == "switch":
+                            if exposed_attributes["type"] in device_types:
                                 for exposed_features in exposed_attributes["features"]:
                                     if (
                                         "property" in exposed_features
@@ -370,4 +372,5 @@ def get_boolean_definitions_ieee_id(ieee_id, attribute):
                                                 "value_on": exposed_features["value_on"],
                                                 "value_off": exposed_features["value_off"],
                                             }
+                                        
     return {}
