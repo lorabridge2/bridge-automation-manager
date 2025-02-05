@@ -153,9 +153,14 @@ def compose_nodered_flow_to_json(flow: LBflow, output_file: str) -> None:
                 nodered_template_new[0]["parameters"][0]["current_value"] = (
                     device_classes.DEVICE_CLASSES[node.device_attribute]
                 )
-                template_nodes["topic"] = (
+                if "set" in template_nodes["topic"] and "zigbee2mqtt" in template_nodes["topic"]:
+                        template_nodes["topic"] = (
                     "zigbee2mqtt/" + get_device_ieee_id(node.device_id) + "/set"
-                )
+                    )
+                if "get" in template_nodes["topic"] and "zigbee2mqtt" in template_nodes["topic"]:
+                        template_nodes["topic"] = (
+                    "zigbee2mqtt/" + get_device_ieee_id(node.device_id) + "/get"
+                    )
 
             nodered_flow[0]["nodes"].append(template_nodes)
 

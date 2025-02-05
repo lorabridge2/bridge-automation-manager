@@ -86,6 +86,53 @@
         ]
     },
     {
+        "id": "9ea64b7bca5ff0f8",
+        "type": "inject",
+        "z": "",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "15",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"state\": \"\"}",
+        "payloadType": "str",
+        "x": 830,
+        "y": 760,
+        "wires": [
+            [
+                "2202c161b0c7e67b"
+            ]
+        ]
+    },
+    {
+        "id": "2202c161b0c7e67b",
+        "type": "mqtt out",
+        "z": "",
+        "name": "",
+        "topic": "zigbee2mqtt/insert_z2m_ID/get",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "",
+        "x": 1130,
+        "y": 760,
+        "wires": []
+    },
+    {
         "id": "0fe3cb89b87e9ea7",
         "type": "mqtt in",
         "z": "",
