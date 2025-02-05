@@ -142,7 +142,14 @@ command_byte_structures = {
         "input_node": 4,
         "input": 5,
     },
-    action_bytes.DISCONNECT_NODE: {"action_byte": 0, "flow_id": 1, "output_node": 2, "output": 3},
+    action_bytes.DISCONNECT_NODE: {
+        "action_byte": 0, 
+        "flow_id": 1, 
+        "output_node": 2, 
+        "output": 3,
+        "input_node": 4,
+        "input": 5,
+        },
     action_bytes.PARAMETER_UPDATE: {
         "action_byte": 0,
         "flow_id": 1,
@@ -290,10 +297,13 @@ def remove_node(flow_id, node_id) -> int:
 
     _flow.nodes.remove(_node)
 
-    for node in _flow.nodes:
-        for wire in node.wires:
-            if node_id in wire:
-                wire.remove(node_id)
+    for output_wires in _node.wires:
+        for nodered_out_uuid in output_wires:        
+            for node in _flow.nodes:
+                for input_wires in node.wires:
+                    for nodered_in_uuid in input_wires:
+                        if nodered_out_uuid == nodered_in_uuid:
+                            input_wires.remove(nodered_in_uuid)
 
     return error_messages.NO_ERRORS
 
@@ -322,7 +332,6 @@ def connect_nodes(flow_id, output_node_id, output_id, input_node_id, input_id) -
     if input_nodered_uuid not in _output_node.wires[output_id]:
         _output_node.wires[output_id].append(input_nodered_uuid)
 
-    # TODO: Optinal ADD Here: or later in final generator function, which updates the output node "notset" wire in the template
 
     for nr_output_node in _output_node.nodered_template[1:]:
         if nr_output_node["id"] == output_nodered_uuid:
@@ -332,17 +341,32 @@ def connect_nodes(flow_id, output_node_id, output_id, input_node_id, input_id) -
     return error_messages.NO_ERRORS
 
 
-def disconnect_nodes(flow_id, output_node_id, output_id) -> int:
+def disconnect_nodes(flow_id, output_node_id, output_id, input_node_id, input_id) -> int:
 
     _flow = seek_flow(flow_id)
     if _flow == None:
         return error_messages.FLOW_NOT_FOUND
 
+    _input_node = seek_node(flow_id, input_node_id)
+    if _input_node == None:
+        return error_messages.NODE_NOT_FOUND
+
     _output_node = seek_node(flow_id, output_node_id)
     if _output_node == None:
         return error_messages.NODE_NOT_FOUND
 
-    _output_node.wires[output_id] = -1
+    output_nodered_uuid = _output_node.nodered_template[0]["outputs"][output_id]
+
+    input_nodered_uuid = _input_node.nodered_template[0]["inputs"][input_id]
+
+    if input_nodered_uuid in _output_node.wires[output_id]:
+        _output_node.wires[output_id].remove(input_nodered_uuid)
+
+
+    for nr_output_node in _output_node.nodered_template[1:]:
+        if nr_output_node["id"] == output_nodered_uuid:
+            if input_nodered_uuid not in nr_output_node["wires"][0]:
+                nr_output_node["wires"][0].remove(input_nodered_uuid)
 
     return error_messages.NO_ERRORS
 
@@ -686,16 +710,22 @@ def parse_compressed_command(command) -> int:
                 command_byte_structures[action_bytes.DISCONNECT_NODE]["output_node"]
             ]
             output = command[command_byte_structures[action_bytes.DISCONNECT_NODE]["output"]]
+            input_node = command[command_byte_structures[action_bytes.CONNECT_NODE]["input_node"]]
+            input = command[command_byte_structures[action_bytes.CONNECT_NODE]["input"]]
 
             current_flow = seek_flow(flow_id)
             if current_flow == None:
                 return error_messages.FLOW_NOT_FOUND
+            
+            _input_node = seek_node(flow_id, input_node)
+            if _input_node == None:
+                return error_messages.NODE_NOT_FOUND
 
             _output_node = seek_node(flow_id, output_node)
             if _output_node == None:
                 return error_messages.NODE_NOT_FOUND
 
-            err = disconnect_nodes(flow_id, output_node, output)
+            err = disconnect_nodes(flow_id, output_node, output, input_node, input)
             print(err)
 
         case action_bytes.PARAMETER_UPDATE:
