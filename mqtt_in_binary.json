@@ -54,7 +54,7 @@
         "type": "function",
         "z": "16bd3c11959482c1",
         "name": " input state filter",
-        "func": "\nvar newMsg;\n\n if(msg.payload.lb_device_attribute == lb_boolean_true) {\n    newMsg = { payload: true};\n}\nelse if(msg.payload.lb_device_attribute == lb_boolean_false) {\n    newMsg = { payload: false};\n}\n\nnewMsg.topic = \"binary_state\"\n\nreturn newMsg;",
+        "func": "\nvar newMsg;\n\n if(msg.payload.lb_device_attribute == lb_boolean_true) {\n    newMsg = { payload: true};\n}\nelse if(msg.payload.lb_device_attribute == lb_boolean_false) {\n    newMsg = { payload: false};\n}\n\nnewMsg.topic = \"binary_new_state\"\n\nreturn newMsg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
