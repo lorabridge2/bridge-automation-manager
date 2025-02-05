@@ -1,0 +1,19 @@
+[
+    {
+        "description": "",
+        "id": "notgenerated",
+        "type": "(optional)",        
+        "inputs": [""],
+        "outputs": [""],
+        "input_descriptions": [""],
+        "output_descriptions": [""],        
+        "parameters": [ 
+            {
+                "nametag": "lb_test_value",
+                "current_value": 0,
+                "node_id": "",
+                "nodekey": "func"
+            }                                           
+        ]
+    }
+]

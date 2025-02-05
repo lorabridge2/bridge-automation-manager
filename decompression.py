@@ -291,8 +291,9 @@ def remove_node(flow_id, node_id) -> int:
     _flow.nodes.remove(_node)
 
     for node in _flow.nodes:
-        if node_id in node.wires:
-            node.wires.remove(node_id)
+        for wire in node.wires:
+            if node_id in wire:
+                wire.remove(node_id)
 
     return error_messages.NO_ERRORS
 
@@ -318,13 +319,15 @@ def connect_nodes(flow_id, output_node_id, output_id, input_node_id, input_id) -
 
     input_nodered_uuid = _input_node.nodered_template[0]["inputs"][input_id]
 
-    _output_node.wires[output_id] = input_nodered_uuid
+    if input_nodered_uuid not in _output_node.wires[output_id]:
+        _output_node.wires[output_id].append(input_nodered_uuid)
 
     # TODO: Optinal ADD Here: or later in final generator function, which updates the output node "notset" wire in the template
 
     for nr_output_node in _output_node.nodered_template[1:]:
         if nr_output_node["id"] == output_nodered_uuid:
-            nr_output_node["wires"] = [[input_nodered_uuid]]
+            if input_nodered_uuid not in nr_output_node["wires"][0]:
+                nr_output_node["wires"][0].append(input_nodered_uuid)
 
     return error_messages.NO_ERRORS
 
