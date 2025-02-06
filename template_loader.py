@@ -355,8 +355,8 @@ def get_boolean_definitions_ieee_id(ieee_id, attribute):
                                     "value_on": exposed_attributes["value_on"],
                                     "value_off": exposed_attributes["value_off"],
                                 }
-                        # Switch
-                        device_types = ["switch", "light"]
+                        # Specific device types as documented in https://www.zigbee2mqtt.io/guide/usage/exposes.html#light 
+                        device_types = ["switch", "light", "fan", "cover", "lock"]
 
                         if "type" in exposed_attributes and "features" in exposed_attributes:
                             if exposed_attributes["type"] in device_types:
