@@ -14,6 +14,16 @@ Features
 - Conversion of LB flows to NodeRED flows
 - Uploading of NodeRED flows to NodeRED
 
+## Environment Variables
+
+- `MQTT_HOST`: IP or hostname of MQTT host
+- `MQTT_PORT`: Port used by MQTT
+- `REDIS_HOST`: IP or hostname of Redis host
+- `REDIS_PORT`: Port used by Redis
+- `REDIS_DB`: Number of the database used inside Redis
+- `NODERED_HOST`: IP or hostname of Nodered host
+- `NODERED_PORT`: Port used by Nodered
+
 ## License
 
 All the LoRaBridge software components and the documentation are licensed under GNU General Public License 3.0.
