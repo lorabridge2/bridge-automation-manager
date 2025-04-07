@@ -442,7 +442,7 @@ def pull_device_update():
                 dev_join += device_classes.DEVICE_CLASSES.index(dev_attribute).to_bytes(1, "big")
         redis_client.lpush(REDIS_DEVICE_JOIN, dev_join)
 
-        redis_client.execute_command(f"DEL lorabridge:device:{ieee_id.decode("utf-8")}:stats:old")
+        redis_client.execute_command(f"DEL lorabridge:device:{ieee_id.decode('utf-8')}:stats:old")
 
 def parse_compressed_command(command) -> int:
     # Sanity checks:
